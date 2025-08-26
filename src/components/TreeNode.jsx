@@ -19,17 +19,19 @@ function TreeNode({ name, data, level = 0, nodeType = 'default' })
     // Define styles based on node type
     const getNodeStyles = () => 
     {
-        const baseClasses = "text-center whitespace-nowrap px-3 py-2 rounded border font-medium";
+        const baseClasses = "text-center whitespace-nowrap px-4 py-3 rounded font-semibold font-serif";
         
         switch(nodeType) {
             case 'correct':
-                return `${baseClasses} bg-green-100 border-green-500 text-green-800`;
+                return `${baseClasses} text-green-800`;
             case 'guess':
-                return `${baseClasses} bg-red-100 border-red-500 text-red-800`;
+                return `${baseClasses} text-red-800`;
             case 'common':
-                return `${baseClasses} bg-blue-100 border-blue-500 text-blue-800`;
+                return `${baseClasses} text-blue-800`;
+            case 'neighbor':
+                return `${baseClasses} text-gray-700 text-opacity-30`;
             default:
-                return `${baseClasses} bg-gray-100 border-gray-300 text-gray-700`;
+                return `${baseClasses} text-gray-700`;
         }
     };
 

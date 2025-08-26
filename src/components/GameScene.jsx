@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import languageData from '../language-tree.json'
 
 function GameScene({ navigateToScene, score, setScore})
 {

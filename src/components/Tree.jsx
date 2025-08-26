@@ -14,7 +14,7 @@ function TreeContainer({ children })
             
             const scaleX = (containerRect.width * 0.95) / contentRect.width;
             const scaleY = (containerRect.height * 0.95) / contentRect.height;
-            const newScale = Math.min(scaleX, scaleY, 2);
+            const newScale = Math.min(scaleX, scaleY, 1);
             
             setScale(newScale);
         }
@@ -23,7 +23,7 @@ function TreeContainer({ children })
     return (
         <div 
             ref={containerRef}
-            className="w-full h-screen flex items-center justify-center p-4 overflow-hidden"
+            className="w-full min-h-screen flex items-center justify-center p-4 overflow-hidden"
         >
             <div 
                 ref={contentRef}
@@ -47,17 +47,21 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
         
         const traverse = (obj, path) => 
         {
+            // Check if the object exists and is valid
             if (obj && typeof obj === 'object') 
             {
+                // Check if the object has a dictionary attribute, if the dictionary is an array, and the dictionary has words
+                // Nodes with dictionaries are languages
                 if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
                 {
+                    // Append a language object to languages
                     languages.push({
                         path: path.join(", "),
                         name: path[path.length - 1],
                         dictionary: obj.dictionary
                     })
                 }
-
+                // Search through children of current object
                 const objectKeys = Object.keys(obj)
                 for (let i = 0; i < objectKeys.length; i++) 
                 {
@@ -65,6 +69,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
                     const currentValue = obj[currentKey]
                     if (currentKey !== 'dictionary') 
                     {
+                        // Append the current key to the existing path and traverse
                         const newPath = [...path, currentKey]
                         traverse(currentValue, newPath)
                     }
@@ -72,6 +77,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
             }
         }
         
+        // Get root values and begin traversal
         const rootKeys = Object.keys(data)
         for (let i = 0; i < rootKeys.length; i++) 
         {
@@ -255,7 +261,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
 
     return (
         <TreeContainer>
-            <div className="flex justify-center items-start gap-8">
+            <div className="justify-center items-start overflow-hidden">
                 {Object.entries(scoringData).map(([rootName, rootData]) => (
                     <TreeNode 
                         key={rootName}
