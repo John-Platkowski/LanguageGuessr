@@ -15,7 +15,7 @@ function TreeScene({ navigateToScene , guessLanguage, correctLanguage }) {
             </div>
             
             <div className="flex-1">
-                <LanguageTree languageData={languageData} guessLanguage={guessLanguage} correctLanguage={correctLanguage}/>
+                <LanguageTree languageData={languageData} guessLanguage={"Tocharian A"} correctLanguage={"Russian"}/>
             </div>
         </div>
     );

@@ -1,73 +1,37 @@
 import { useState, useRef, useEffect } from 'react'
 import TreeNode from './TreeNode'
 
-// Draggable Container Component
-function DraggableTreeContainer({ children }) 
+function TreeContainer({ children }) 
 {
     const containerRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
+    const contentRef = useRef(null);
+    const [scale, setScale] = useState(1);
 
-    const handleMouseDown = (e) => 
-    {
-        setIsDragging(true);
-        setDragStart({ x: e.clientX, y: e.clientY });
-        setScrollStart({ 
-            x: containerRef.current.scrollLeft, 
-            y: containerRef.current.scrollTop 
-        });
-        e.preventDefault();
-    };
-
-    const handleMouseMove = (e) => 
-    {
-        if (!isDragging) return;
-        
-        const deltaX = dragStart.x - e.clientX;
-        const deltaY = dragStart.y - e.clientY;
-        
-        containerRef.current.scrollLeft = scrollStart.x + deltaX;
-        containerRef.current.scrollTop = scrollStart.y + deltaY;
-    };
-
-    const handleMouseUp = () => 
-    {
-        setIsDragging(false);
-    };
-
-    useEffect(() => 
-    {
-        if (isDragging) 
-        {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'grabbing';
+    useEffect(() => {
+        if (containerRef.current && contentRef.current) {
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const contentRect = contentRef.current.getBoundingClientRect();
             
-            return () => 
-            {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.cursor = 'default';
-            };
+            const scaleX = (containerRect.width * 0.95) / contentRect.width;
+            const scaleY = (containerRect.height * 0.95) / contentRect.height;
+            const newScale = Math.min(scaleX, scaleY, 2);
+            
+            setScale(newScale);
         }
-    }, [isDragging, dragStart, scrollStart]);
+    }, [children]);
 
     return (
         <div 
             ref={containerRef}
-            className="w-full h-full overflow-hidden overflow-y-hidden"
-            style={{ 
-                cursor: isDragging ? 'grabbing' : 'grab',
-                userSelect: 'none'
-            }}
-            onMouseDown={handleMouseDown}
+            className="w-full h-screen flex items-center justify-center p-4 overflow-hidden"
         >
-            <div style={{ 
-                minWidth: '20000px',
-                minHeight: '2500px',
-                padding: '200px'
-            }}>
+            <div 
+                ref={contentRef}
+                style={{ 
+                    transform: `scale(${scale})`,
+                    transformOrigin: 'center center'
+                }}
+            >
                 {children}
             </div>
         </div>
@@ -76,7 +40,6 @@ function DraggableTreeContainer({ children })
 
 function LanguageTree({ languageData, correctLanguage, guessLanguage }) 
 {
-
     // Recursive function to find all languages with dictionaries
     const getAllLanguages = (data) => 
     {
@@ -192,13 +155,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
             }
         }
 
-        // If no common ancestor found, return empty
-        if (commonAncestorIndex === -1) 
-        {
-            return {};
-        }
-
-        // Build the tree structure starting from common ancestor
+        // Build the tree structure from a path
         const buildPathTree = (path, startIndex, nodeType) => 
         {
             if (startIndex >= path.length) 
@@ -207,24 +164,34 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
             }
 
             const currentNode = path[startIndex];
+            const childTree = buildPathTree(path, startIndex + 1, nodeType);
+            
             const result = 
             {
                 [currentNode]: 
                 {
                     nodeType: nodeType, // 'correct', 'guess', or 'common'
                     dictionary: [], // Empty for now, could be populated if needed
-                    ...buildPathTree(path, startIndex + 1, nodeType)
+                    ...childTree
                 }
             };
 
             return result;
         };
 
-        // Create the final data structure
-        const finalData = {};
-        const commonAncestor = correctPath[commonAncestorIndex];
+        // If no common ancestor found, display both trees separately
+        if (commonAncestorIndex === -1) 
+        {
+            const correctTree = buildPathTree(correctPath, 0, 'correct');
+            const guessTree = buildPathTree(guessPath, 0, 'guess');
+            
+            return {
+                ...correctTree,
+                ...guessTree
+            };
+        }
 
-        // Start building from the common ancestor
+        // If there is a common ancestor, merge the trees
         const correctSubTree = buildPathTree(correctPath, commonAncestorIndex, 'correct');
         const guessSubTree = buildPathTree(guessPath, commonAncestorIndex, 'guess');
 
@@ -287,8 +254,8 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
     console.log(scoringData)
 
     return (
-        <DraggableTreeContainer>
-            <div className="flex justify-center" style={{ gap: '200px' }}>
+        <TreeContainer>
+            <div className="flex justify-center items-start gap-8">
                 {Object.entries(scoringData).map(([rootName, rootData]) => (
                     <TreeNode 
                         key={rootName}
@@ -298,7 +265,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
                     />
                 ))}
             </div>
-        </DraggableTreeContainer>
+        </TreeContainer>
     );
 }
 
