@@ -1,53 +1,57 @@
 import { useState, useEffect } from 'react'
-import languageData from '../language-tree.json'
 
-function GameScene({ navigateToScene, score, setScore})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages})
 {
-    const [guess, setGuess] = useState("")
-    const [currentWord, setCurrentWord] = useState("RATER")
-    const [currentDefinition, setCurrentDefinition] = useState("")
-    const [currentTranslation, setCurrentTranslation] = useState("")
+    const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
+    const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
+    const [currentTranslation, setCurrentTranslation] = useState("[NOT INITIALIZED]")
     const [wordNumber, setWordNumber] = useState(1)
     const [totalWords, setTotalWords] = useState(6)
     
-    const wordBank = [
-        { 
-            word: 'RATER', 
-            language: 'French', 
-            translation: "Fail", 
-            meaning: "to be unsuccessful in achieving one's goal; to not succeed" 
-        },
-        { 
-            word: 'GIFT', 
-            language: 'German', 
-            translation: "Poison", 
-            meaning: "a toxic substance that causes harm or death when ingested or absorbed" 
-        },
-        { 
-            word: 'БРАТ', 
-            language: 'Russian', 
-            translation: "Brother", 
-            meaning: "a male sibling; a male who shares the same parents" 
-        },
-        { 
-            word: 'PIE', 
-            language: 'Spanish', 
-            translation: "Foot", 
-            meaning: "the lower extremity of the leg below the ankle; used for standing and walking" 
-        },
-        { 
-            word: 'ARM', 
-            language: 'German', 
-            translation: "Poor", 
-            meaning: "lacking sufficient money or resources; having little wealth" 
-        },
-        { 
-            word: 'CHEF', 
-            language: 'French', 
-            translation: "Boss/Chief", 
-            meaning: "a person in charge; a leader or head of an organization or group" 
+    
+    const getRandomElement = (arr) =>
+    {
+        const randomIndex = Math.floor(Math.random() * arr.length);
+        return arr[randomIndex];
+    }
+
+    const getWordBank = (languages) => 
+    {
+        /* 
+        [languageData:]
+        "name": 
+        {
+            "dictionary":
+            [
+                {"word": "(lang word)", "translation": "(eng word)", "definition_1": "(eng def)", "definition_2": "(eng def 2)"},
+            ]
         }
-    ]
+
+        [languages:]
+        {"path": [], "name": "", "dictionary": [{languageData word structure}]},
+        */
+        const words = []
+        //for (let i = 0; i < totalWords; i++)
+        for (let i = 0; i < 2; i++)
+        {
+            console.log("length: " + languages[i].length);
+            if (languages[i].length > 0)
+            {
+                const randomLanguage = getRandomElement(languages)
+                setLanguage(randomLanguage[1])
+                const randomWord = getRandomElement(randomLanguage[i][2])
+                bank.push({
+                    word: randomWord[0],
+                    language: randomLanguage,
+                    translation: randomWord[1],
+                    meaning: randomWord[2]
+                })
+            }
+        }
+        return words
+    }
+
+    const wordBank = getWordBank(allLanguages)
 
     useEffect(() => 
     {
@@ -59,6 +63,7 @@ function GameScene({ navigateToScene, score, setScore})
         const currentWordData = wordBank[wordNumber - 1]
         if (currentWordData) 
         {
+            setLanguage(`${currentWordData.language}`)
             setCurrentWord(currentWordData.word)
             setCurrentTranslation(`${currentWordData.translation}` + ":")
             setCurrentDefinition(`${currentWordData.meaning}`)
@@ -69,15 +74,15 @@ function GameScene({ navigateToScene, score, setScore})
     {
         if (e) e.preventDefault()
         // guess checking logic here
-
         console.log("Guessed:", guess)
-        setGuess("")
+        navigateToScene("tree")
     }
 
     const nextWord = () =>
     {
         if (wordNumber < totalWords) 
         {
+        setLanguage(wordBank[wordNumber]?.language || 'NEXT')
         setWordNumber(wordNumber + 1)
         setCurrentWord(wordBank[wordNumber]?.word || 'NEXT')
         setCurrentTranslation(wordBank[wordNumber]?.translation  + ": "|| 'NEXT')

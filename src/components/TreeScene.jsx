@@ -1,7 +1,7 @@
 import LanguageTree from './Tree'
 import languageData from '../language-tree.json'
 
-function TreeScene({ navigateToScene , guessLanguage, correctLanguage }) {
+function TreeScene({ navigateToScene , guess, language }) {
     return (
         <div className="max-h-screen bg-[url(/src/assets/background.png)] bg-cover bg-no-repeat flex flex-col overflow-hidden">
             <div className="">
@@ -15,7 +15,7 @@ function TreeScene({ navigateToScene , guessLanguage, correctLanguage }) {
                 </div>
 
                 <div className="flex">
-                    <LanguageTree languageData={languageData} guessLanguage={"English"} correctLanguage={"Russian"}/>
+                    <LanguageTree languageData={languageData} guessLanguage={guess} correctLanguage={language}/>
                 </div>
             </div>
         </div>

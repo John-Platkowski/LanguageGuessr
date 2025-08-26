@@ -14,7 +14,8 @@
             {
                 "dictionary":
                 [
-
+                    {"word": "Hi", "translation": "Hisihasdf", "definition_1": "feeling or asdfas pleasure or contentment.", "definition_2": "having a sense of confidence in or satisfaction with (a person, arrangement, or situation)."},
+                    {"word": "Hello", "translation": "Poor", "definition_1": "lacking sufficient fffff to live at a standard considered comfortable or normal in a society."}
                 ]
             }
         },
