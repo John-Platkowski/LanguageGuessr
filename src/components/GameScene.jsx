@@ -7,7 +7,8 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     const [currentTranslation, setCurrentTranslation] = useState("[NOT INITIALIZED]")
     const [wordNumber, setWordNumber] = useState(1)
     const [totalWords, setTotalWords] = useState(6)
-    
+    const [wordBank, setWordBank] = useState([])
+    const [isInitialized, setIsInitialized] = useState(false)
     
     const getRandomElement = (arr) =>
     {
@@ -18,55 +19,87 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     const getWordBank = (languages) => 
     {
         /* 
-        [languageData:]
-        "name": 
-        {
-            "dictionary":
-            [
-                {"word": "(lang word)", "translation": "(eng word)", "definition_1": "(eng def)", "definition_2": "(eng def 2)"},
-            ]
-        }
-
-        [languages:]
-        {"path": [], "name": "", "dictionary": [{languageData word structure}]},
+        allLanguages structure:
+        [
+            {
+                "path": "Indo, Indo-Iranian, Indic, ...", 
+                "name": "Bengali", 
+                "dictionary": [
+                    {"word": "খুশি", "translation": "Happy", "definition_1": "feeling or showing pleasure..."},
+                    ...
+                ]
+            },
+            ...
+        ]
         */
         const words = []
-        //for (let i = 0; i < totalWords; i++)
-        for (let i = 0; i < 2; i++)
+        
+        
+        // Create word bank from available languages
+        const wordsToGenerate = Math.min(totalWords, languages.length)
+        
+        for (let i = 0; i < wordsToGenerate; i++)
         {
-            console.log("length: " + languages[i].length);
-            if (languages[i].length > 0)
+            if (languages.length > 0)
             {
                 const randomLanguage = getRandomElement(languages)
-                setLanguage(randomLanguage[1])
-                const randomWord = getRandomElement(randomLanguage[i][2])
-                bank.push({
-                    word: randomWord[0],
-                    language: randomLanguage,
-                    translation: randomWord[1],
-                    meaning: randomWord[2]
+                const randomWord = getRandomElement(randomLanguage.dictionary)
+                
+                words.push({
+                    word: randomWord.word,
+                    language: randomLanguage.name,
+                    translation: randomWord.translation,
+                    meaning: randomWord.definition_1 || "No definition available"
                 })
+                
+                // Remove used language to avoid duplicates [RE-ADD WHEN LANGUAGES MERGED]
+                // const languageIndex = availableLanguages.indexOf(randomLanguage)
+                // if (languageIndex > -1) {
+                //     availableLanguages.splice(languageIndex, 1)
+                // }
             }
         }
+        
+        console.log("Generated word bank:", words)
         return words
     }
 
-    const wordBank = getWordBank(allLanguages)
-
+    // Initialize word bank only once when allLanguages is available
     useEffect(() => 
     {
-        enterGame()
+        if (allLanguages && allLanguages.length > 0 && !isInitialized) {
+            console.log("Initializing word bank...")
+            const newWordBank = getWordBank(allLanguages)
+            setWordBank(newWordBank)
+            setIsInitialized(true)
+        }
+    }, [allLanguages, isInitialized])
+
+    // Set up the first word when wordBank is ready
+    useEffect(() => 
+    {
+        if (wordBank.length > 0 && wordNumber === 1) {
+            console.log("Setting up first word...")
+            enterGame(wordBank)
+        }
+    }, [wordBank])
+    
+
+    // Clear input field when component mounts (when returning to game scene)
+    useEffect(() => 
+    {
+        setGuess("")
     }, [])
 
-    const enterGame = () => 
+    const enterGame = (bank = wordBank) => 
     {
-        const currentWordData = wordBank[wordNumber - 1]
+        const currentWordData = bank[wordNumber - 1]
         if (currentWordData) 
         {
-            setLanguage(`${currentWordData.language}`)
+            setLanguage(currentWordData.language)
             setCurrentWord(currentWordData.word)
-            setCurrentTranslation(`${currentWordData.translation}` + ":")
-            setCurrentDefinition(`${currentWordData.meaning}`)
+            setCurrentTranslation(currentWordData.translation)
+            setCurrentDefinition(currentWordData.meaning)
         }
     }
 
@@ -80,13 +113,18 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
     const nextWord = () =>
     {
-        if (wordNumber < totalWords) 
+        if (wordNumber < totalWords && wordNumber < wordBank.length) 
         {
-        setLanguage(wordBank[wordNumber]?.language || 'NEXT')
-        setWordNumber(wordNumber + 1)
-        setCurrentWord(wordBank[wordNumber]?.word || 'NEXT')
-        setCurrentTranslation(wordBank[wordNumber]?.translation  + ": "|| 'NEXT')
-        setCurrentDefinition(wordBank[wordNumber]?.meaning || 'NEXT')
+            const nextWordIndex = wordNumber // This will be the next word (0-indexed)
+            const nextWordData = wordBank[nextWordIndex]
+            
+            if (nextWordData) {
+                setLanguage(nextWordData.language)
+                setWordNumber(wordNumber + 1)
+                setCurrentWord(nextWordData.word)
+                setCurrentTranslation(nextWordData.translation)
+                setCurrentDefinition(nextWordData.meaning)
+            }
         }
     }
 
