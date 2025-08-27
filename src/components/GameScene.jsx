@@ -1,66 +1,105 @@
 import { useState, useEffect } from 'react'
 
-function GameScene({ navigateToScene, score, setScore})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages})
 {
-    const [guess, setGuess] = useState("")
-    const [currentWord, setCurrentWord] = useState("RATER")
-    const [currentDefinition, setCurrentDefinition] = useState("")
-    const [currentTranslation, setCurrentTranslation] = useState("")
+    const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
+    const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
+    const [currentTranslation, setCurrentTranslation] = useState("[NOT INITIALIZED]")
     const [wordNumber, setWordNumber] = useState(1)
     const [totalWords, setTotalWords] = useState(6)
+    const [wordBank, setWordBank] = useState([])
+    const [isInitialized, setIsInitialized] = useState(false)
     
-    const wordBank = [
-        { 
-            word: 'RATER', 
-            language: 'French', 
-            translation: "Fail", 
-            meaning: "to be unsuccessful in achieving one's goal; to not succeed" 
-        },
-        { 
-            word: 'GIFT', 
-            language: 'German', 
-            translation: "Poison", 
-            meaning: "a toxic substance that causes harm or death when ingested or absorbed" 
-        },
-        { 
-            word: 'БРАТ', 
-            language: 'Russian', 
-            translation: "Brother", 
-            meaning: "a male sibling; a male who shares the same parents" 
-        },
-        { 
-            word: 'PIE', 
-            language: 'Spanish', 
-            translation: "Foot", 
-            meaning: "the lower extremity of the leg below the ankle; used for standing and walking" 
-        },
-        { 
-            word: 'ARM', 
-            language: 'German', 
-            translation: "Poor", 
-            meaning: "lacking sufficient money or resources; having little wealth" 
-        },
-        { 
-            word: 'CHEF', 
-            language: 'French', 
-            translation: "Boss/Chief", 
-            meaning: "a person in charge; a leader or head of an organization or group" 
-        }
-    ]
+    const getRandomElement = (arr) =>
+    {
+        const randomIndex = Math.floor(Math.random() * arr.length);
+        return arr[randomIndex];
+    }
 
+    const getWordBank = (languages) => 
+    {
+        /* 
+        allLanguages structure:
+        [
+            {
+                "path": "Indo, Indo-Iranian, Indic, ...", 
+                "name": "Bengali", 
+                "dictionary": [
+                    {"word": "খুশি", "translation": "Happy", "definition_1": "feeling or showing pleasure..."},
+                    ...
+                ]
+            },
+            ...
+        ]
+        */
+        const words = []
+        
+        
+        // Create word bank from available languages
+        const wordsToGenerate = Math.min(totalWords, languages.length)
+        
+        for (let i = 0; i < wordsToGenerate; i++)
+        {
+            if (languages.length > 0)
+            {
+                const randomLanguage = getRandomElement(languages)
+                const randomWord = getRandomElement(randomLanguage.dictionary)
+                
+                words.push({
+                    word: randomWord.word,
+                    language: randomLanguage.name,
+                    translation: randomWord.translation,
+                    meaning: randomWord.definition_1 || "No definition available"
+                })
+                
+                // Remove used language to avoid duplicates [RE-ADD WHEN LANGUAGES MERGED]
+                // const languageIndex = availableLanguages.indexOf(randomLanguage)
+                // if (languageIndex > -1) {
+                //     availableLanguages.splice(languageIndex, 1)
+                // }
+            }
+        }
+        
+        console.log("Generated word bank:", words)
+        return words
+    }
+
+    // Initialize word bank only once when allLanguages is available
     useEffect(() => 
     {
-        enterGame()
+        if (allLanguages && allLanguages.length > 0 && !isInitialized) {
+            console.log("Initializing word bank...")
+            const newWordBank = getWordBank(allLanguages)
+            setWordBank(newWordBank)
+            setIsInitialized(true)
+        }
+    }, [allLanguages, isInitialized])
+
+    // Set up the first word when wordBank is ready
+    useEffect(() => 
+    {
+        if (wordBank.length > 0 && wordNumber === 1) {
+            console.log("Setting up first word...")
+            enterGame(wordBank)
+        }
+    }, [wordBank])
+    
+
+    // Clear input field when component mounts (when returning to game scene)
+    useEffect(() => 
+    {
+        setGuess("")
     }, [])
 
-    const enterGame = () => 
+    const enterGame = (bank = wordBank) => 
     {
-        const currentWordData = wordBank[wordNumber - 1]
+        const currentWordData = bank[wordNumber - 1]
         if (currentWordData) 
         {
+            setLanguage(currentWordData.language)
             setCurrentWord(currentWordData.word)
-            setCurrentTranslation(`${currentWordData.translation}` + ":")
-            setCurrentDefinition(`${currentWordData.meaning}`)
+            setCurrentTranslation(currentWordData.translation)
+            setCurrentDefinition(currentWordData.meaning)
         }
     }
 
@@ -68,19 +107,24 @@ function GameScene({ navigateToScene, score, setScore})
     {
         if (e) e.preventDefault()
         // guess checking logic here
-
         console.log("Guessed:", guess)
-        setGuess("")
+        navigateToScene("tree")
     }
 
     const nextWord = () =>
     {
-        if (wordNumber < totalWords) 
+        if (wordNumber < totalWords && wordNumber < wordBank.length) 
         {
-        setWordNumber(wordNumber + 1)
-        setCurrentWord(wordBank[wordNumber]?.word || 'NEXT')
-        setCurrentTranslation(wordBank[wordNumber]?.translation  + ": "|| 'NEXT')
-        setCurrentDefinition(wordBank[wordNumber]?.meaning || 'NEXT')
+            const nextWordIndex = wordNumber // This will be the next word (0-indexed)
+            const nextWordData = wordBank[nextWordIndex]
+            
+            if (nextWordData) {
+                setLanguage(nextWordData.language)
+                setWordNumber(wordNumber + 1)
+                setCurrentWord(nextWordData.word)
+                setCurrentTranslation(nextWordData.translation)
+                setCurrentDefinition(nextWordData.meaning)
+            }
         }
     }
 
