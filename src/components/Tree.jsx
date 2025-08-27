@@ -23,7 +23,7 @@ function TreeContainer({ children })
     return (
         <div 
             ref={containerRef}
-            className="w-full min-h-screen flex items-center justify-center p-4 overflow-hidden"
+            className="w-full min-h-screen flex items-center justify-center p-4 overflow-hidden -mt-60 select-none"
         >
             <div 
                 ref={contentRef}
@@ -38,7 +38,7 @@ function TreeContainer({ children })
     );
 }
 
-function LanguageTree({ languageData, correctLanguage, guessLanguage }) 
+function LanguageTree({ languageData, correctLanguage, guessLanguage, score, setScore }) 
 {
     const getPath = (data, languageName) => 
     {
@@ -209,18 +209,43 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage })
         getPath(languageData, guessLanguage)
     )
     
+
+    const calculateScore = (correctPath, guessPath) =>
+    {
+        if (!correctPath || !guessPath) {return 0;}
+        let traversals = correctPath.length + guessPath.length
+        const minLength = Math.min(correctPath.length, guessPath.length)
+        for (let i = 0; i < minLength; i++)
+        {
+            if (correctPath[i] === guessPath[i])
+            {
+                // Subtract common paths
+                traversals -= 1
+            }
+        }
+        // 20, 10, 5, 2, 1, 0
+        return Math.floor(20 / (2**traversals))
+    }
+    useEffect(() => 
+    {
+        const correctPath = getPath(languageData, correctLanguage);
+        const guessPath = getPath(languageData, guessLanguage);
+        const newPoints = calculateScore(correctPath, guessPath);
+        setScore(prevScore => prevScore + newPoints);
+    }, [correctLanguage, guessLanguage]);
     console.log(scoringData)
 
     return (
         <TreeContainer>
-            <div className="justify-center items-start overflow-hidden">
+            <div className="flex justify-center items-start space-x-32 w-full">
                 {Object.entries(scoringData).map(([rootName, rootData]) => (
-                    <TreeNode 
-                        key={rootName}
-                        name={rootName} 
-                        data={rootData} 
-                        level={0}
-                    />
+                    <div key={rootName} className="flex-shrink-0">
+                        <TreeNode 
+                            name={rootData.displayName || rootName}
+                            data={rootData} 
+                            level={0}
+                        />
+                    </div>
                 ))}
             </div>
         </TreeContainer>
