@@ -6,6 +6,7 @@ function TreeContainer({ children })
     const containerRef = useRef(null);
     const contentRef = useRef(null);
     const [scale, setScale] = useState(1);
+    const [animationStarted, setAnimationStarted] = useState(false);
 
     useEffect(() => {
         if (containerRef.current && contentRef.current) {
@@ -17,6 +18,7 @@ function TreeContainer({ children })
             const newScale = Math.min(scaleX, scaleY, 1);
             
             setScale(newScale);
+            setTimeout(() => setAnimationStarted(true), 100);
         }
     }, [children]);
 
@@ -27,6 +29,9 @@ function TreeContainer({ children })
         >
             <div 
                 ref={contentRef}
+                className={`transition-opacity duration-500 ${
+                    animationStarted ? 'opacity-100' : 'opacity-0'
+                }`}
                 style={{ 
                     transform: `scale(${scale})`,
                     transformOrigin: 'center center'
@@ -239,7 +244,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         <TreeContainer>
             <div className="flex justify-center items-start space-x-32 w-full">
                 {Object.entries(scoringData).map(([rootName, rootData]) => (
-                    <div key={rootName} className="flex-shrink-0">
+                    <div key={rootName} className="flex-shrink-0 transition-all duration-300">
                         <TreeNode 
                             name={rootData.displayName || rootName}
                             data={rootData} 

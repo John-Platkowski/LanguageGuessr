@@ -1,11 +1,23 @@
 import { useState, useRef, useEffect } from 'react'
 
-function TreeNode({ name, data, level = 0, nodeType = 'default' }) 
+function TreeNode({ name, data, level = 0, nodeType = 'default', animationDelay = 0 }) 
 {
     // Check if this node has children (non-dictionary keys)
     const hasChildren = data && typeof data === 'object' && Object.keys(data).some(key => key !== 'dictionary' && key !== 'nodeType');
     const nodeRef = useRef(null);
     const [nodeWidth, setNodeWidth] = useState(0);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => 
+    {
+        const timer = setTimeout(() => 
+        {
+            setIsVisible(true);
+        }, animationDelay);
+
+        return () => clearTimeout(timer);
+    }, [animationDelay]);
+
 
     useEffect(() => 
     {
@@ -59,7 +71,10 @@ function TreeNode({ name, data, level = 0, nodeType = 'default' })
         <div className="flex flex-col items-center">
             <div 
                 ref={nodeRef}
-                className={getNodeStyles()}
+                className={`${getNodeStyles()} transition-all duration-300 
+                ${
+                    isVisible ? 'opacity-100 transform-none' : 'opacity-0 translate-y-2'
+                }`}
             >
                 {name}
             </div>
@@ -67,13 +82,14 @@ function TreeNode({ name, data, level = 0, nodeType = 'default' })
             {hasChildren && children.length > 0 && (
                 <div style={{ marginTop: getVerticalSpacing() }}>
                     <div className="flex justify-center" style={{ marginLeft: getSpacing() }}>
-                        {children.map(([childName, childData]) => (
+                        {children.map(([childName, childData], index) => (
                             <TreeNode 
                                 key={childName}
                                 name={childName} 
                                 data={childData} 
                                 level={level + 1}
                                 nodeType={childData?.nodeType || 'default'}
+                                animationDelay={(level + 1) * 150 + index * 50}
                             />
                         ))}
                     </div>
