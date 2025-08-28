@@ -87,6 +87,12 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     useEffect(() => 
     {
         setGuess("")
+        const fetchData = fetch("/api/test-db")
+        if (fetchData.ok)
+        {
+            alert("Hello World!")
+        }
+
     }, [])
 
     const enterGame = (bank = wordBank) => 
