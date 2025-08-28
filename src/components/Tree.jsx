@@ -213,18 +213,18 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
     const calculateScore = (correctPath, guessPath) =>
     {
         if (!correctPath || !guessPath) {return 0;}
-        let traversals = correctPath.length + guessPath.length
+        let traversals = correctPath.length + guessPath.length + 2 // + 2 for common root
         const minLength = Math.min(correctPath.length, guessPath.length)
         for (let i = 0; i < minLength; i++)
         {
             if (correctPath[i] === guessPath[i])
             {
-                // Subtract common paths
-                traversals -= 1
+                // Subtract common paths of both ends
+                traversals -= 2
             }
         }
         // 20, 10, 5, 2, 1, 0
-        return Math.floor(20 / (2**traversals))
+        return Math.max(20 - (2 * traversals), 0)
     }
     useEffect(() => 
     {
