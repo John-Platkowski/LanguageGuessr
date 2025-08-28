@@ -15,53 +15,59 @@ function App()
   // Recursive function to find all languages with dictionaries
   const getAllLanguages = (data) => 
   {
-      const languages = []
+    const languages = []
       
       const traverse = (obj, path) => 
       {
-          // Check if the object exists and is valid
-          if (obj && typeof obj === 'object') 
-          {
-              // Check if the object has a dictionary attribute, if the dictionary is an array, and the dictionary has words
-              // Nodes with dictionaries are languages
-              if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
-              {
-                  // Append a language object to languages
-                  languages.push({
-                      path: path.join(", "),
-                      name: path[path.length - 1],
-                      dictionary: obj.dictionary
-                  })
-              }
-              // Search through children of current object
-              const objectKeys = Object.keys(obj)
-              for (let i = 0; i < objectKeys.length; i++) 
-              {
-                  const currentKey = objectKeys[i]
-                  const currentValue = obj[currentKey]
-                  if (currentKey !== 'dictionary') 
-                  {
-                      // Append the current key to the existing path and traverse
-                      const newPath = [...path, currentKey]
-                      traverse(currentValue, newPath)
-                  }
-              }
-          }
-      }
-      
-      // Get root values and begin traversal
-      const rootKeys = Object.keys(data)
-      for (let i = 0; i < rootKeys.length; i++) 
-      {
-          const rootKey = rootKeys[i]
-          const rootValue = data[rootKey]
-          traverse(rootValue, [rootKey])
-      }
-      console.log("Languages : " + languages)
-      return languages
+        // Check if the object exists and is valid
+        if (obj && typeof obj === 'object') 
+        {
+            // Check if the object has a dictionary attribute, if the dictionary is an array, and the dictionary has words
+            // Nodes with dictionaries are languages
+            if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
+            {
+                // Append a language object to languages
+                languages.push({
+                    path: path.join(", "),
+                    name: path[path.length - 1],
+                    dictionary: obj.dictionary
+                })
+            }
+            // Search through children of current object
+            const objectKeys = Object.keys(obj)
+            for (let i = 0; i < objectKeys.length; i++) 
+            {
+                const currentKey = objectKeys[i]
+                const currentValue = obj[currentKey]
+                if (currentKey !== 'dictionary') 
+                {
+                    // Append the current key to the existing path and traverse
+                    const newPath = [...path, currentKey]
+                    traverse(currentValue, newPath)
+                }
+            }
+        }
+    }
+    
+    // Get root values and begin traversal
+    const rootKeys = Object.keys(data)
+    for (let i = 0; i < rootKeys.length; i++) 
+    {
+        const rootKey = rootKeys[i]
+        const rootValue = data[rootKey]
+        traverse(rootValue, [rootKey])
+    }
+    return languages
   }
-  
+
+  const getLanguageNames = (languages) => 
+  {
+    // Map all languages to an array of their names, sorting by name such that there are no duplicates
+    return languages.map(lang => lang.name).sort().filter((name, index, arr) => arr.indexOf(name) === index)
+  }
+
   const allLanguages = getAllLanguages(languageData)
+  const allLanguageNames = getLanguageNames(allLanguages)
 
   // Scene navigation functions
   const navigateToScene = (sceneName) => 
@@ -79,7 +85,8 @@ function App()
     setGuess,
     language,
     setLanguage,
-    allLanguages
+    allLanguages,
+    allLanguageNames
   }
 
   return (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import AutoCompleteInput from './AutocompleteInputField'
 
-function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames})
 {
     const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
     const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
@@ -9,6 +10,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     const [totalWords, setTotalWords] = useState(6)
     const [wordBank, setWordBank] = useState([])
     const [isInitialized, setIsInitialized] = useState(false)
+    const [isValidGuess, setIsValidGuess] = useState(false)
     
     const getRandomElement = (arr) =>
     {
@@ -59,8 +61,6 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 // }
             }
         }
-        
-        console.log("Generated word bank:", words)
         return words
     }
 
@@ -68,7 +68,6 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     useEffect(() => 
     {
         if (allLanguages && allLanguages.length > 0 && !isInitialized) {
-            console.log("Initializing word bank...")
             const newWordBank = getWordBank(allLanguages)
             setWordBank(newWordBank)
             setIsInitialized(true)
@@ -79,7 +78,6 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     useEffect(() => 
     {
         if (wordBank.length > 0 && wordNumber === 1) {
-            console.log("Setting up first word...")
             enterGame(wordBank)
         }
     }, [wordBank])
@@ -105,9 +103,14 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
     const handleGuess = (e) =>
     {
-        if (e) e.preventDefault()
-        // guess checking logic here
-        console.log("Guessed:", guess)
+        if (e) 
+        {
+            e.preventDefault()
+        }
+        if (!isValidGuess)
+        {
+            return
+        }
         navigateToScene("tree")
     }
 
@@ -157,36 +160,35 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
                 {/*English translation & definition subtitle */}
                 <div className="text-[#70a861] text-lg font-serif text-left mb-2">
-                    Meaning <span className="font-semibold text-[#5e814c]">{currentTranslation}</span> {currentDefinition}. 
+                    Meaning <span className="font-semibold text-[#5e814c]">{currentTranslation}, </span> {currentDefinition} 
                 </div>
 
                 {/* Input field */}
                 <div className="flex items-center w-full max-w-md mb-30 ml-20 space-x-2">
-                    <input
-                        type="text"
+                    <AutoCompleteInput
                         value={guess}
-                        onChange={(e) => setGuess(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleGuess(e)}
+                        onChange={setGuess}
+                        onSubmit={handleGuess}
+                        onValidationChange={setIsValidGuess}
+                        languageNames={allLanguageNames}
                         placeholder="  Guess a language"
                         className="w-full px-2 py-1 text-lg bg-[#5e814c] text-[#81d177] rounded-lg border-none outline-none focus:ring-1 focus:ring-[#81d177] font-serif placeholder:italic"
-                        style={{ caretColor: '#70a861' }}
                     />
-                        {/* Button to confirm guess in input field */}
                     <button 
                         onClick={() => handleGuess()}
                         className="px-2 py-0.75 border-4 border-[#5e814c] bg-transparent text-[#5e814c] rounded-lg hover:bg-[#5e814c] hover:text-[#81d177] transition-colors font-serif font-semibold"
                     >
-                    Enter
+                        Enter
                     </button>
                 </div>
-            
+
 
                 {/* Score */}
                 <div className="text-[#70a861] text-lg font-serif mr-20">
                     Your score today is <span className="font-semibold text-[#5e814c]">{score} pt.</span>
                 </div>
                 
-                {/* Debug button for development */}
+                {/* Debug button */}
                 <button 
                     onClick={nextWord}
                     className="mt-20 px-2 py-1 mr-10 bg-[#5e814c] text-[#70a861] rounded-lg hover:bg-[#7f8f5f] transition-colors"
@@ -194,7 +196,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 Next Word [DEBUG]
                 </button>
 
-                {/* Debug button for development */}
+                {/* Debug button */}
                 <button 
                     onClick={() => navigateToScene("tree")}
                     className="mt-20 px-2 py-1 bg-[#5e814c] text-[#70a861] rounded-lg hover:bg-[#7f8f5f] transition-colors"
