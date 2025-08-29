@@ -119,7 +119,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         }
 
         // Build the tree structure from a path
-        const buildPathTree = (path, startIndex, nodeType) => 
+        const buildPathTree = (path, startIndex, nodeType, targetLanguage) => 
         {
             if (startIndex >= path.length) 
             {
@@ -127,13 +127,20 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
             }
 
             const currentNode = path[startIndex];
-            const childTree = buildPathTree(path, startIndex + 1, nodeType);
+            const isTargetLanguage = currentNode === targetLanguage;
+            const childTree = buildPathTree(path, startIndex + 1, nodeType, targetLanguage);
             
+            let finalNodeType = nodeType;
+            if (isTargetLanguage)
+            {
+                finalNodeType = nodeType === 'correct' ? 'true_correct' : nodeType === 'guess' ? 'true_guess': nodeType;
+            }
+
             const result = 
             {
                 [currentNode]: 
                 {
-                    nodeType: nodeType, // 'correct', 'guess', or 'common'
+                    nodeType: finalNodeType, // 'correct', 'guess', 'common', 'true_guess', or 'true_correct'
                     dictionary: [], // Empty for now, could be populated if needed
                     ...childTree
                 }
@@ -145,8 +152,8 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         // If no common ancestor found, display both trees separately
         if (commonAncestorIndex === -1) 
         {
-            const correctTree = buildPathTree(correctPath, 0, 'correct');
-            const guessTree = buildPathTree(guessPath, 0, 'guess');
+            const correctTree = buildPathTree(correctPath, 0, 'correct', correctLanguage);
+            const guessTree = buildPathTree(guessPath, 0, 'guess', guessLanguage);
             
             return {
                 ...correctTree,
@@ -155,8 +162,8 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         }
 
         // If there is a common ancestor, merge the trees
-        const correctSubTree = buildPathTree(correctPath, commonAncestorIndex, 'correct');
-        const guessSubTree = buildPathTree(guessPath, commonAncestorIndex, 'guess');
+        const correctSubTree = buildPathTree(correctPath, commonAncestorIndex, 'correct', correctLanguage);
+        const guessSubTree = buildPathTree(guessPath, commonAncestorIndex, 'guess', guessLanguage);
 
         // Merge the trees, handling the common parts
         const mergeNode = (node1, node2) => 
@@ -197,7 +204,10 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
             const currentNode = correctPath[currentIndex];
             if (currentNode === guessPath[currentIndex] && tree[currentNode]) 
             {
-                tree[currentNode].nodeType = 'common';
+                if (tree[currentNode] !== 'true_correct' && tree[currentNode] !== 'true_guess')
+                {
+                    tree[currentNode].nodeType = 'common';
+                }
                 markCommonNodes(tree[currentNode], correctPath, guessPath, currentIndex + 1);
             }
             
@@ -228,8 +238,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
                 traversals -= 2
             }
         }
-        // 20, 10, 5, 2, 1, 0
-        return Math.max(20 - (2 * traversals), 0)
+        return Math.min(20, Math.max(20 - (2 * traversals), 0))
     }
     useEffect(() => 
     {
