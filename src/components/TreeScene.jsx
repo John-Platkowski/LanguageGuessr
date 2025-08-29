@@ -3,7 +3,7 @@ import LanguageTree from './Tree'
 import languageData from '../language-tree.json'
 import ScoreDisplay from './ScoreDisplay'
 
-function TreeScene({ navigateToScene, guess, language, score, setScore }) 
+function TreeScene({ navigateToScene, guess, language, score, setScore, roundScore, setRoundScore }) 
 {
     const [shortcutEnabled, setShortcutEnabled] = useState(false)
     const waitTimeMS = 1200
@@ -40,17 +40,18 @@ function TreeScene({ navigateToScene, guess, language, score, setScore })
             <div className="flex items-center justify-center p-6 mt-20">
                 <button 
                     onClick={() => navigateToScene("game")}
-                    className={`px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all duration-300 text-xl z-20 ${
+                    className={`px-6 py-3 bg-[#5e814c] text-white rounded-lg hover:bg-[#70a861] transition-all duration-300 text-xl z-20 ${
                         shortcutEnabled ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 >
-                    Back to Game
+                    <span className="text-[#81d177]">Back to Game</span>
                 </button>
             </div>
 
             <div className="flex flex-col items-center h-auto">
                 <ScoreDisplay 
-                    score={score} 
+                    score={score}
+                    roundScore={roundScore}
                     correctLanguage={language} 
                     guessLanguage={guess}
                 />
@@ -60,6 +61,8 @@ function TreeScene({ navigateToScene, guess, language, score, setScore })
                     correctLanguage={language} 
                     score={score} 
                     setScore={setScore}
+                    roundScore={roundScore}
+                    setRoundScore={setRoundScore}
                 />
             </div>
         </div>

@@ -11,6 +11,7 @@ function App()
   const [score, setScore] = useState(0)
   const [guess, setGuess] = useState("")
   const [language, setLanguage] = useState("")
+  const [roundScore, setRoundScore] = useState(0)
 
   // Recursive function to find all languages with dictionaries
   const getAllLanguages = (data) => 
@@ -86,7 +87,9 @@ function App()
     language,
     setLanguage,
     allLanguages,
-    allLanguageNames
+    allLanguageNames,
+    roundScore,
+    setRoundScore
   }
 
   return (

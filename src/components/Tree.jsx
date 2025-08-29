@@ -43,7 +43,7 @@ function TreeContainer({ children })
     );
 }
 
-function LanguageTree({ languageData, correctLanguage, guessLanguage, score, setScore }) 
+function LanguageTree({ languageData, correctLanguage, guessLanguage, score, setScore, roundScore, setRoundScore }) 
 {
     const getPath = (data, languageName) => 
     {
@@ -246,6 +246,7 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         const guessPath = getPath(languageData, guessLanguage);
         const newPoints = calculateScore(correctPath, guessPath);
         setScore(prevScore => prevScore + newPoints);
+        setRoundScore(newPoints);
     }, [correctLanguage, guessLanguage]);
     console.log(scoringData)
 
