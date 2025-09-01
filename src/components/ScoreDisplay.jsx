@@ -1,5 +1,6 @@
 
-function ScoreDisplay({ score, correctLanguage, guessLanguage, roundScore }) {
+function ScoreDisplay({ score, correctLanguage, guessLanguage, roundScore }) 
+{
     return (
         <div className="bg-opacity-90 rounded-lg p-6 mb-6">
             <div className="text-center">

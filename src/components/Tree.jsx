@@ -8,8 +8,10 @@ function TreeContainer({ children })
     const [scale, setScale] = useState(1);
     const [animationStarted, setAnimationStarted] = useState(false);
 
-    useEffect(() => {
-        if (containerRef.current && contentRef.current) {
+    useEffect(() => 
+    {
+        if (containerRef.current && contentRef.current) 
+        {
             const containerRect = containerRef.current.getBoundingClientRect();
             const contentRect = contentRef.current.getBoundingClientRect();
             
@@ -224,22 +226,28 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         getPath(languageData, guessLanguage)
     )
     
-
-    const calculateScore = (correctPath, guessPath) =>
+    const calculateScore = (correctPath, guessPath) => 
     {
-        if (!correctPath || !guessPath) {return 0;}
-        let traversals = correctPath.length + guessPath.length + 2 // + 2 for common root
-        const minLength = Math.min(correctPath.length, guessPath.length)
-        for (let i = 0; i < minLength; i++)
+        if (!correctPath || !guessPath) return 0;
+        // Find index of lowest common ancestor
+        let lcaIndex = -1;
+        const minLength = Math.min(correctPath.length, guessPath.length);
+        for (let i = 0; i < minLength; i++) 
         {
-            if (correctPath[i] === guessPath[i])
+            if (correctPath[i] === guessPath[i]) 
             {
-                // Subtract common paths of both ends
-                traversals -= 2
+                lcaIndex = i;
+            } else {
+                break;
             }
         }
-        return Math.min(20, Math.max(20 - (2 * traversals), 0))
-    }
+
+        // Distance = steps up from guess to LCA + steps up from correct to LCA
+        const traversals = (correctPath.length - (lcaIndex + 1)) + (guessPath.length - (lcaIndex + 1));
+
+        return Math.max(20 - traversals, 0);
+    };
+
     useEffect(() => 
     {
         const correctPath = getPath(languageData, correctLanguage);
