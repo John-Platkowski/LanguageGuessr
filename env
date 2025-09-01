@@ -1,0 +1,2 @@
+DATABASE_URL=postgresql://postgres:North0rGeTPeter1@localhost:5432/lingoguess
+PORT=5000

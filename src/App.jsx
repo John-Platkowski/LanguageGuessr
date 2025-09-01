@@ -92,12 +92,21 @@ function App()
     setRoundScore
   }
 
+useEffect(() => {
+  fetch('http://localhost:5000/api/users')
+    .then(res => res.json())
+    .then(data => console.log(data))
+    .catch(err => console.error(err));
+}, []);
+
   return (
     <>
       {currentScene === "game" && <GameScene {...sceneProps} />}
       {currentScene === "tree" && <TreeScene {...sceneProps} />}
     </>
   )
+
+  
 }
 
 export default App
