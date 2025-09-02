@@ -32,6 +32,7 @@ app.get("/api/users", async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error(err);
+        console.error("Error querying users table:", err);
         res.status(500).json({ error: "DB query failed" });
     }
 });
