@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import GameScene from './components/GameScene.jsx'
 import TreeScene from './components/TreeScene.jsx'
 import languageData from './language-tree.json'
@@ -9,6 +9,7 @@ function App()
   
   // Shared state that multiple scenes might need
   const [score, setScore] = useState(0)
+  const [userId, setUserId] = useState(1);
   const [guess, setGuess] = useState("")
   const [language, setLanguage] = useState("")
   const [roundScore, setRoundScore] = useState(0)
@@ -92,11 +93,67 @@ function App()
     setRoundScore
   }
 
-useEffect(() => {
-  fetch('http://localhost:5000/api/users')
-    .then(res => res.json())
-    .then(data => console.log(data))
-    .catch(err => console.error(err));
+  useEffect(() => 
+  {
+    fetch('http://localhost:5000/api/users')
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => 
+    {
+      if (score === 0||!userId) return;
+
+      fetch("http://localhost:5000/api/update-score",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",  
+        },
+        body:JSON.stringify(
+          {
+            id: userId,
+            newScore: score,
+          }
+        ),
+      })
+      .then((res) => res.json())
+      .then((data) => console.log("Server response:", data))
+      .catch((err) => console.error("Error updating score:",err))
+  }
+),[score, userId]
+
+
+
+useEffect(() =>
+{
+  //ID generator for new users, stored on browser
+  const initUser = async () =>
+  {
+    let id = localStorage.getItem("userId");
+    // First time login; no id
+    if(!id)
+    {
+      const res = await fetch("http://localhost:5000/api/new-user", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+        localStorage.setItem("userId", data.id); // save UUID locally
+        console.log("New user created:", data);
+      })
+      .catch((err) => console.error("Failed to create user", err));
+      const data = await res.json();
+      id = data.id;
+      localStorage.setItem("userId", id);
+    } else {
+      console.log("Existing user:", userId);
+    }
+
+    setUserId(id);
+    return id;
+  };
+  
+  initUser();
 }, []);
 
   return (

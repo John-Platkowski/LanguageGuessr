@@ -193,23 +193,36 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 <div className="text-[#70a861] text-lg font-serif mr-20">
                     Your score today is <span className="font-semibold text-[#5e814c]">{score} pt.</span>
                 </div>
-                
-                {/* Debug button */}
-                <button 
-                    onClick={nextWord}
-                    className="mt-20 px-2 py-1 mr-10 bg-[#5e814c] text-[#70a861] rounded-lg hover:bg-[#7f8f5f] transition-colors"
-                >
-                Next Word [DEBUG]
-                </button>
+                {/* Debug reset button */}
+                <div className="mt-4">
+                <button
+                    onClick={async () => 
+                    {
+                    if (!window.confirm("⚠ This will delete ALL users and reset your local data. Continue?")) 
+                    {
+                        return;
+                    }
 
-                {/* Debug button */}
-                <button 
-                    onClick={() => navigateToScene("tree")}
-                    className="mt-20 px-2 py-1 bg-[#5e814c] text-[#70a861] rounded-lg hover:bg-[#7f8f5f] transition-colors"
-                >
-                Change to Tree Scene [DEBUG]
-                </button>
+                    try 
+                    {
+                        const res = await fetch("/api/debug/reset-users", { method: "DELETE" });
+                        const data = await res.json();
 
+                        // Clear localStorage userId
+                        localStorage.removeItem("userId");
+
+                        console.log("Reset result:", data);
+                        alert("All users reset + local data cleared. Reload the page to reinitialize.");
+                    } catch (err) {
+                        console.error("Reset failed:", err);
+                        alert("Reset failed. Check console.");
+                    }
+                    }}
+                    className="px-3 py-1 border-2 border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
+                >
+                    ⚠ Reset All Users (Debug)
+                </button>
+                </div>
             </div>
         </div>
     )

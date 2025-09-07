@@ -3,7 +3,7 @@
     {
         "Tocharian":
         {
-            "Tocharian A":
+            "Tocharian":
             {
                 "dictionary":
                 [
@@ -18,7 +18,6 @@
                     {"word": "läks", "translation": "Fish", "definition_1": "an aquatic animal.", "definition_2": "a resource in Tocharian diets."},
                     {"word": "śiśäk", "translation": "Head", "definition_1": "the upper part of the body.", "definition_2": "a symbol of leadership or thought."},
                     {"word": "mänt", "translation": "Injury", "definition_1": "physical harm or damage.", "definition_2": "a setback or wound in Tocharian life."},
-                    {"word": "okso", "translation": "Ox", "definition_1": "a large working animal.", "definition_2": "a vital asset in Tocharian agriculture."},
                     {"word": "śäk", "translation": "Joy", "definition_1": "a feeling of great happiness.", "definition_2": "a state of delight or celebration."},
                     {"word": "äknåts", "translation": "Ignorant", "definition_1": "lacking knowledge or awareness.", "definition_2": "uneducated or uninformed."},
                     {"word": "kärn", "translation": "Grain", "definition_1": "small seeds of cereal plants.", "definition_2": "a staple in Tocharian food."},
@@ -36,42 +35,6 @@
                     {"word": "äñcäm", "translation": "Self", "definition_1": "one’s own identity or being.", "definition_2": "the core of personal existence."},
                     {"word": "klyäw", "translation": "Fame", "definition_1": "widespread recognition or renown.", "definition_2": "honor in Tocharian society."},
                     {"word": "wäṣt", "translation": "Home", "definition_1": "a place of residence or refuge.", "definition_2": "a center of family life."},
-                    {"word": "śäñ", "translation": "Own", "definition_1": "belonging to oneself.", "definition_2": "personal or private possession."}
-                ]
-            },
-            "Tocharian B":
-            {
-                "dictionary":
-                [
-                    {"word": "āṣāṃ", "translation": "Seat", "definition_1": "a place to sit or rest.", "definition_2": "a position of honor in Tocharian culture."},
-                    {"word": "käṣṣī", "translation": "Teacher", "definition_1": "one who instructs or guides.", "definition_2": "a respected figure in Tocharian society."},
-                    {"word": "pärkare", "translation": "Longing", "definition_1": "a strong desire or yearning.", "definition_2": "an emotional craving for something absent."},
-                    {"word": "śarya", "translation": "Seed", "definition_1": "a plant’s reproductive unit.", "definition_2": "a symbol of growth or potential."},
-                    {"word": "yok", "translation": "Hair", "definition_1": "strands growing on the head.", "definition_2": "a feature of personal appearance."},
-                    {"word": "tmāṃ", "translation": "Darkness", "definition_1": "absence of light or visibility.", "definition_2": "a state of mystery or gloom."},
-                    {"word": "klyomo", "translation": "Noble", "definition_1": "having high moral qualities.", "definition_2": "a person of high status in Tocharian society."},
-                    {"word": "śaiw", "translation": "Cause", "definition_1": "a reason or motive for action.", "definition_2": "the origin of an event or outcome."},
-                    {"word": "lākṣe", "translation": "Fish", "definition_1": "an aquatic animal.", "definition_2": "a resource in Tocharian diets."},
-                    {"word": "śiśāk", "translation": "Head", "definition_1": "the upper part of the body.", "definition_2": "a symbol of leadership or thought."},
-                    {"word": "mänt", "translation": "Injury", "definition_1": "physical harm or damage.", "definition_2": "a setback or wound in Tocharian life."},
-                    {"word": "okso", "translation": "Ox", "definition_1": "a large working animal.", "definition_2": "a vital asset in Tocharian agriculture."},
-                    {"word": "śäk", "translation": "Joy", "definition_1": "a feeling of great happiness.", "definition_2": "a state of delight or celebration."},
-                    {"word": "äknātsa", "translation": "Ignorant", "definition_1": "lacking knowledge or awareness.", "definition_2": "uneducated or uninformed."},
-                    {"word": "kärn", "translation": "Grain", "definition_1": "small seeds of cereal plants.", "definition_2": "a staple in Tocharian food."},
-                    {"word": "päśśi", "translation": "Guard", "definition_1": "one who protects or watches.", "definition_2": "a defender in Tocharian communities."},
-                    {"word": "yäṣ", "translation": "Path", "definition_1": "a trail or route for travel.", "definition_2": "a course of action or life journey."},
-                    {"word": "älyāke", "translation": "Other", "definition_1": "different or distinct from this.", "definition_2": "an alternative or separate entity."},
-                    {"word": "kukāl", "translation": "Wheel", "definition_1": "a circular object for movement.", "definition_2": "a tool in Tocharian transport."},
-                    {"word": "śäryai", "translation": "Friend", "definition_1": "a close companion or ally.", "definition_2": "a trusted figure in Tocharian culture."},
-                    {"word": "mäsk", "translation": "Difficulty", "definition_1": "a state of challenge or hardship.", "definition_2": "an obstacle requiring effort."},
-                    {"word": "yāp", "translation": "Water", "definition_1": "a clear liquid essential for life.", "definition_2": "a symbol of purity or renewal."},
-                    {"word": "knānm", "translation": "Knowledge", "definition_1": "information or understanding.", "definition_2": "wisdom valued in Tocharian culture."},
-                    {"word": "säk", "translation": "Time", "definition_1": "a period or duration.", "definition_2": "a moment or era in Tocharian life."},
-                    {"word": "läṅk", "translation": "Light", "definition_1": "illumination or brightness.", "definition_2": "a symbol of clarity or hope."},
-                    {"word": "tsäk", "translation": "Tooth", "definition_1": "a hard structure in the mouth.", "definition_2": "a feature of health or strength."},
-                    {"word": "äñcäṃ", "translation": "Self", "definition_1": "one’s own identity or being.", "definition_2": "the core of personal existence."},
-                    {"word": "klyāu", "translation": "Fame", "definition_1": "widespread recognition or renown.", "definition_2": "honor in Tocharian society."},
-                    {"word": "wāṣt", "translation": "Home", "definition_1": "a place of residence or refuge.", "definition_2": "a center of family life."},
                     {"word": "śäñ", "translation": "Own", "definition_1": "belonging to oneself.", "definition_2": "personal or private possession."}
                 ]
             }
@@ -1847,7 +1810,6 @@
                             {"word": "pszenica", "translation": "Wheat", "definition_1": "a cereal grain for food.", "definition_2": "a staple in diets."},
                             {"word": "połączenie", "translation": "Link", "definition_1": "a connection or tie.", "definition_2": "a symbol of unity or bonding."},
                             {"word": "błoto", "translation": "Mud", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
-                            {"word": "koza", "translation": "Goat", "definition_1": "a domesticated animal for milk.", "definition_2": "a resource in agriculture."},
                             {"word": "drzwi", "translation": "Door", "definition_1": "an entrance to a building.", "definition_2": "a passage or access point."},
                             {"word": "pokój", "translation": "Peace", "definition_1": "a state of calm or tranquility.", "definition_2": "freedom from conflict."},
                             {"word": "szelest", "translation": "Rustle", "definition_1": "a soft, crackling sound.", "definition_2": "a gentle stirring, as of leaves."},
@@ -1883,7 +1845,6 @@
                             {"word": "pšenica", "translation": "Grain", "definition_1": "a cereal seed for food.", "definition_2": "a staple in diets."},
                             {"word": "sъvęzъ", "translation": "Bond", "definition_1": "a connection or tie.", "definition_2": "a symbol of unity or loyalty."},
                             {"word": "blato", "translation": "Clay", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
-                            {"word": "koza", "translation": "Sheep", "definition_1": "a domesticated animal for wool.", "definition_2": "a resource in agriculture."},
                             {"word": "dьvьri", "translation": "Entrance", "definition_1": "a way into a building.", "definition_2": "a passage or access point."},
                             {"word": "mirъ", "translation": "Calm", "definition_1": "a state of tranquility.", "definition_2": "freedom from conflict or disturbance."},
                             {"word": "šumъ", "translation": "Rustle", "definition_1": "a soft, crackling sound.", "definition_2": "a gentle stirring, as of leaves."},
@@ -1919,7 +1880,6 @@
                             {"word": "pšenice", "translation": "Grain", "definition_1": "a cereal seed for food.", "definition_2": "a staple in diets."},
                             {"word": "spoj", "translation": "Bond", "definition_1": "a connection or tie.", "definition_2": "a symbol of unity or loyalty."},
                             {"word": "bahnisko", "translation": "Clay", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
-                            {"word": "koza", "translation": "Sheep", "definition_1": "a domesticated animal for wool.", "definition_2": "a resource in agriculture."},
                             {"word": "dveře", "translation": "Entrance", "definition_1": "a way into a building.", "definition_2": "a passage or access point."},
                             {"word": "mír", "translation": "Calm", "definition_1": "a state of tranquility.", "definition_2": "freedom from conflict or disturbance."},
                             {"word": "šustot", "translation": "Rustle", "definition_1": "a soft, crackling sound.", "definition_2": "a gentle stirring, as of leaves."},
@@ -1994,7 +1954,6 @@
                             {"word": "pšenica", "translation": "Grain", "definition_1": "a cereal seed for food.", "definition_2": "a staple in diets."},
                             {"word": "veza", "translation": "Bond", "definition_1": "a connection or tie.", "definition_2": "a symbol of unity or loyalty."},
                             {"word": "blato", "translation": "Clay", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
-                            {"word": "koza", "translation": "Sheep", "definition_1": "a domesticated animal for wool.", "definition_2": "a resource in agriculture."},
                             {"word": "vrata", "translation": "Entrance", "definition_1": "a way into a building.", "definition_2": "a passage or access point."},
                             {"word": "mir", "translation": "Calm", "definition_1": "a state of tranquility.", "definition_2": "freedom from conflict or disturbance."},
                             {"word": "šum", "translation": "Rustle", "definition_1": "a soft, crackling sound.", "definition_2": "a gentle stirring, as of leaves."},
@@ -2299,7 +2258,6 @@
                         {"word": "stjørna", "translation": "Star", "definition_1": "a celestial body visible at night.", "definition_2": "a symbol of guidance or hope."},
                         {"word": "veggur", "translation": "Barrier", "definition_1": "a vertical structure for protection.", "definition_2": "a dividing or defensive feature."},
                         {"word": "hveiti", "translation": "Grain", "definition_1": "a cereal seed for food.", "definition_2": "a staple in diets."},
-                        {"word": "bond", "translation": "Bond", "definition_1": "a connection or tie.", "definition_2": "a symbol of unity or loyalty."},
                         {"word": "leir", "translation": "Clay", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
                         {"word": "geit", "translation": "Sheep", "definition_1": "a domesticated animal for wool.", "definition_2": "a resource in agriculture."},
                         {"word": "hurð", "translation": "Entrance", "definition_1": "a way into a building.", "definition_2": "a passage or access point."},
@@ -2416,12 +2374,9 @@
                             {"word": "sterre", "translation": "Star", "definition_1": "a celestial body visible at night.", "definition_2": "a symbol of guidance or hope."},
                             {"word": "wal", "translation": "Barrier", "definition_1": "a vertical structure for protection.", "definition_2": "a defensive or dividing feature."},
                             {"word": "whete", "translation": "Wheat", "definition_1": "a cereal grain for food.", "definition_2": "a staple in diets."},
-                            {"word": "bond", "translation": "Connection", "definition_1": "a tie or link.", "definition_2": "a symbol of unity or attachment."},
-                            {"word": "clay", "translation": "Mud", "definition_1": "wet, sticky earth.", "definition_2": "a material for pottery or building."},
                             {"word": "sheep", "translation": "Ewe", "definition_1": "a female sheep.", "definition_2": "a source of wool or livestock."},
                             {"word": "erthe", "translation": "Earth", "definition_1": "the ground or soil.", "definition_2": "a foundation for agriculture."},
                             {"word": "stillnesse", "translation": "Quiet", "definition_1": "a state of silence or calm.", "definition_2": "freedom from noise or disturbance."},
-                            {"word": "hop", "translation": "Skip", "definition_1": "a light or playful leap.", "definition_2": "a cheerful or quick movement."},
                             {"word": "gentil", "translation": "Honest", "definition_1": "truthful or sincere.", "definition_2": "upright or trustworthy."},
                             {"word": "trompe", "translation": "Horn", "definition_1": "a musical or signaling instrument.", "definition_2": "a tool for sound or announcement."},
                             {"word": "welle", "translation": "Fountain", "definition_1": "a natural source of water.", "definition_2": "a place of renewal or origin."}
@@ -3465,6 +3420,235 @@
 
             ]
         }
+    },
+    "Dene-Caucasian":
+    {
+        "Sino-Tibetan":
+        {
+            "Chinese":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Tibeto-Burman":
+            {
+               "dictionary":
+                [
+
+                ] 
+            }      
+        },
+        "Basque-Caucasian":
+        {
+            "Basque":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Etruscan":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Hattic":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Uratian":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Hurrian":
+            {
+                "dictionary":
+                [
+
+                ]
+            },
+            "Caucasian":
+            {
+                "dictionary":
+                [
+
+                ]
+            }
+        },
+        "Nostratic":
+        {
+            "Elamo-Dravidian":
+            {
+                "Sumerian":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                },
+                "Elamite":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                },
+                "Dravidian":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                }
+            },
+            "Afro-Asiatic":
+            {
+                "Semitic":
+                {
+                    "South Semitic":
+                    {
+                        "Etheopian":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        },
+                        "South Arabic":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        }
+                    },
+                    "Central Semitic":
+                    {
+                        "Phoenican":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        },
+                        "Hebrew":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        },
+                        "Aramaic":
+                        {
+                           "dictionary":
+                            [
+
+                            ]
+                        },
+                        "Arabic":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        }
+                    },
+                    "Akkadian":
+                    {
+                        "Babylonian":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        },
+                        "Assyrian":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        }
+                    }
+                },
+                "Hamitic":
+                {
+                    "Egyptian":
+                    {
+                        "Ceptic":
+                        {
+                            "dictionary":
+                            [
+
+                            ]
+                        }
+                    },
+                    "Berber":
+                    {
+                        "dictionary":
+                        [
+
+                        ]
+                    },
+                    "Cushitic":
+                    {
+                        "dictionary":
+                        [
+
+                        ]
+                    },
+                    "Chadic":
+                    {
+                        "dictionary":
+                        [
+
+                        ]
+                    }
+                }
+            },
+            "Eurasiatic":
+            {
+                "Uralic":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                },
+                "Altaic":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                },
+                "Eskimo-Aleut":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                },
+                "Chukschi-Kamchatlcan":
+                {
+                    "dictionary":
+                    [
+
+                    ]
+                }
+            }
+        }
     }
+
 }
 
