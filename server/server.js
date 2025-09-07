@@ -37,6 +37,17 @@ app.get("/api/test-db", async (req, res) =>
     }
 });
 
+app.get("/api/users", async (req,res)=>
+{
+  try {
+    const result = await db.query("SELECT * FROM users");
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "DB query failed" });
+  }
+});
+
 app.post("/api/users", async (req, res) => 
 {
     try 
@@ -57,14 +68,14 @@ async function updateScore(id, score)
     const query = `
         UPDATE users
         SET played_today = TRUE,
-            daily_score = $1,
+            daily_score = $2,
             total_games = total_games + 1,
             avg_score = ((avg_score * (total_games) + $1) / (total_games + 1))
-        WHERE id = $2
+        WHERE id = $1
         RETURNING *;
     `;
 
-    const values = [score, id];
+    const values = [id, score];
 
     try
     {
@@ -79,7 +90,22 @@ async function updateScore(id, score)
 // id and word integer
 async function updateProgress(id, wordNumber) 
 {
-    
+    const query = 
+    `
+    UPDATE users
+    SET progress_today = $2-1,
+    WHERE id = $1,
+    RETURNING *;
+    `
+
+    try
+    {
+        const result = await db.query(query, [id, wordNumber]);
+        return result.rows[0];
+    }catch (err){
+        console.error("Error updating progress: ", err);
+        throw err;
+    }
 }
 
 async function updateUsername(id, newName) 
