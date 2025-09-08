@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react'
 import AutoCompleteInput from './AutocompleteInputField'
 
-function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId})
 {
     const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
     const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
     const [currentTranslation, setCurrentTranslation] = useState("[NOT INITIALIZED]")
     const [wordNumber, setWordNumber] = useState(1)
-    const [totalWords, setTotalWords] = useState(6)
+    const [totalWords, setTotalWords] = useState(5)
     const [wordBank, setWordBank] = useState([])
     const [isInitialized, setIsInitialized] = useState(false)
     const [isValidGuess, setIsValidGuess] = useState(false)
+    const [userProgress, setUserProgress] = useState(null)
     
     const getRandomElement = (arr) =>
     {
@@ -36,7 +37,6 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         */
         const words = []
         
-        
         // Create word bank from available languages
         const wordsToGenerate = Math.min(totalWords, languages.length)
         
@@ -53,21 +53,42 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     translation: randomWord.translation,
                     meaning: randomWord.definition_1 || "No definition available"
                 })
-                
-                // Remove used language to avoid duplicates [RE-ADD WHEN LANGUAGES MERGED]
-                // const languageIndex = availableLanguages.indexOf(randomLanguage)
-                // if (languageIndex > -1) {
-                //     availableLanguages.splice(languageIndex, 1)
-                // }
             }
         }
         return words
     }
 
+    // Load user progress from server
+    useEffect(() => 
+    {
+        const loadUserProgress = async () => 
+        {
+            if (!userId) return;
+            
+            try 
+            {
+                const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+                const userData = await response.json();
+                setUserProgress(userData);
+                
+                // Set word number based on progress (progress is 0-indexed, wordNumber is 1-indexed)
+                const currentWordNumber = (userData.progress_today || 0) + 1;
+                setWordNumber(currentWordNumber);
+                
+                console.log('Loaded user progress:', userData);
+            } catch (error) {
+                console.error('Failed to load user progress:', error);
+            }
+        };
+
+        loadUserProgress();
+    }, [userId]);
+
     // Initialize word bank only once when allLanguages is available
     useEffect(() => 
     {
-        if (allLanguages && allLanguages.length > 0 && !isInitialized) {
+        if (allLanguages && allLanguages.length > 0 && !isInitialized) 
+        {
             const newWordBank = getWordBank(allLanguages)
             setWordBank(newWordBank)
             setIsInitialized(true)
@@ -80,24 +101,18 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         if (wordBank.length > 0 && wordNumber === 1) {
             enterGame(wordBank)
         }
-    }, [wordBank])
+    }, [wordBank, userProgress, wordNumber])
     
 
     // Clear input field when component mounts (when returning to game scene)
     useEffect(() => 
     {
         setGuess("")
-        const fetchData = fetch("/api/test-db")
-        if (fetchData.ok)
-        {
-            alert("Hello World!")
-        }
-
     }, [])
 
     const enterGame = (bank = wordBank) => 
     {
-        const currentWordData = bank[wordNumber - 1]
+        const currentWordData = bank[wordNumber - 1] // Convert 1-indexed to 0-indexed
         if (currentWordData) 
         {
             setLanguage(currentWordData.language)
@@ -107,7 +122,25 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
     }
 
-    const handleGuess = (e) =>
+    const updateProgressOnServer = async (newWordNumber) => 
+    {
+        try 
+        {
+            await fetch("http://localhost:5000/api/update-progress", 
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: userId,
+                    wordNumber: newWordNumber - 1 // Convert to 0-based progress
+                })
+            });
+        } catch (error) {
+            console.error('Failed to update progress:', error);
+        }
+    };
+
+    const handleGuess = async (e) =>
     {
         if (e) 
         {
@@ -117,22 +150,36 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         {
             return
         }
-        navigateToScene("tree")
+
+        await updateProgressOnServer(wordNumber);
+
+        nextWord()
+        if (wordNumber >= totalWords)
+        {
+            navigateToScene("end")
+        } else {
+            navigateToScene("tree")
+        }
     }
 
-    const nextWord = () =>
+    const nextWord = () => 
     {
-        if (wordNumber < totalWords && wordNumber < wordBank.length) 
+        const newWordNumber = wordNumber + 1
+        
+        if (newWordNumber <= (totalWords - 1) && (newWordNumber - 1) < wordBank.length) 
         {
-            const nextWordIndex = wordNumber // This will be the next word (0-indexed)
+            const nextWordIndex = newWordNumber - 1 // Convert to 0-based index
             const nextWordData = wordBank[nextWordIndex]
             
-            if (nextWordData) {
+            if (nextWordData) 
+            {
+                setWordNumber(newWordNumber)
                 setLanguage(nextWordData.language)
-                setWordNumber(wordNumber + 1)
                 setCurrentWord(nextWordData.word)
                 setCurrentTranslation(nextWordData.translation)
                 setCurrentDefinition(nextWordData.meaning)
+                
+                console.log(`Prepared word ${newWordNumber}: ${nextWordData.word} (${nextWordData.language})`)
             }
         }
     }
@@ -198,25 +245,25 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 <button
                     onClick={async () => 
                     {
-                    if (!window.confirm("⚠ This will delete ALL users and reset your local data. Continue?")) 
-                    {
-                        return;
-                    }
+                        if (!window.confirm("⚠ This will delete ALL users and reset your local data. Continue?")) 
+                        {
+                            return;
+                        }
 
-                    try 
-                    {
-                        const res = await fetch("http://localhost:5000/api/debug/reset-users", { method: "DELETE" });
-                        const data = await res.json();
+                        try 
+                        {
+                            const res = await fetch("http://localhost:5000/api/debug/reset-users", { method: "DELETE" });
+                            const data = await res.json();
 
-                        // Clear localStorage userId
-                        localStorage.removeItem("userId");
+                            // Clear localStorage userId
+                            localStorage.removeItem("userId");
 
-                        console.log("Reset result:", data);
-                        alert("All users reset + local data cleared. Reload the page to reinitialize.");
-                    } catch (err) {
-                        console.error("Reset failed:", err);
-                        alert("Reset failed. Check console.");
-                    }
+                            console.log("Reset result:", data);
+                            alert("All users reset + local data cleared. Reload the page to reinitialize.");
+                        } catch (err) {
+                            console.error("Reset failed:", err);
+                            alert("Reset failed. Check console.");
+                        }
                     }}
                     className="px-3 py-1 border-2 border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
                 >
@@ -249,6 +296,20 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Populate Fake Users (Debug)
                 </button>
+                {/* Debug final score button */}
+                <div className="mt-2">
+                <button
+                    onClick={() =>
+                    {
+                        const newScore = parseInt(prompt("What's the fake score?"), 10) || 0;
+                        setScore(newScore)
+                        navigateToScene("end")
+                    }}
+                    className="px-3 py-1 border-2 border-yellow-600 text-yellow-600 rounded hover:bg-yellow-600 hover:text-white transition-colors"
+                >
+                    Go to Final Score (Debug)
+                </button>
+                </div>
                 </div>
             </div>
         </div>

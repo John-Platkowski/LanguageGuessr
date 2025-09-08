@@ -45,7 +45,7 @@ function TreeContainer({ children })
     );
 }
 
-function LanguageTree({ languageData, correctLanguage, guessLanguage, score, setScore, roundScore, setRoundScore }) 
+function LanguageTree({ languageData, correctLanguage, guessLanguage, score, setScore, roundScore, setRoundScore, traversals, setTraversals }) 
 {
     const getPath = (data, languageName) => 
     {
@@ -259,9 +259,10 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
         
         // Total distance is the sum of both distances
         const totalDistance = correctToLCA + guessToLCA;
+        setTraversals(totalDistance)
         
         // Score decreases by 2 for each step of distance
-        const score = Math.max(20 - (totalDistance * 2), 0);
+        const score = Math.max(16 - (totalDistance * 2), 0);
         
         return score;
     };
@@ -276,17 +277,12 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
             const guessPath = getPath(languageData, guessLanguage);
             const newPoints = calculateScore(correctPath, guessPath);
             
-            console.log('newPoints calculated:', newPoints);
-            console.log('about to call setScore...');
-            
             setScore(prevScore => {
-                console.log('setScore: prevScore =', prevScore, ', adding =', newPoints, ', new total =', prevScore + newPoints);
                 return prevScore + newPoints;
             });
             setRoundScore(newPoints);
             hasScoredRef.current = true;
             
-            console.log('=== END HANDLE SCORING ===');
         } else {
             console.log('Already scored or missing languages, not scoring');
         }

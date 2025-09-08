@@ -3,7 +3,7 @@ import LanguageTree from './Tree'
 import languageData from '../language-tree.json'
 import ScoreDisplay from './ScoreDisplay'
 
-function TreeScene({ navigateToScene, guess, language, score, setScore, roundScore, setRoundScore }) 
+function TreeScene({ navigateToScene, guess, language, score, setScore, roundScore, setRoundScore, traversals, setTraversals, userId }) 
 {
     const [shortcutEnabled, setShortcutEnabled] = useState(false)
     const waitTimeMS = 1200
@@ -27,7 +27,7 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
         {
             if (e.key === 'Enter') 
             {
-                navigateToScene("game")
+                handleNextWord()
             }
         }
 
@@ -35,16 +35,42 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
         return () => document.removeEventListener('keydown', handleKeyDown)
     }, [navigateToScene, shortcutEnabled])
 
+
+    const handleNextWord = async () => 
+    {
+        // Update progress on server before returning to game
+        try 
+        {
+            const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+            const userData = await response.json();
+            const newProgress = (userData.progress_today || 0) + 1;
+            
+            await fetch("http://localhost:5000/api/update-progress", 
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: userId,
+                    wordNumber: newProgress
+                })
+            });
+        } catch (error) {
+            console.error('Failed to update progress:', error);
+        }
+        
+        navigateToScene("game");
+    }
+
     return (
         <div className="max-h-screen bg-[url(/src/assets/background.png)] bg-cover bg-no-repeat flex flex-col overflow-hidden">
             <div className="flex items-center justify-center p-6 mt-20">
                 <button 
-                    onClick={() => navigateToScene("game")}
+                    onClick={handleNextWord}
                     className={`px-6 py-3 bg-[#5e814c] text-white rounded-lg hover:bg-[#70a861] transition-all duration-300 text-xl z-20 ${
                         shortcutEnabled ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
                 >
-                    <span className="text-[#81d177]">Back to Game</span>
+                    <span className="text-[#81d177]">Next Word</span>
                 </button>
             </div>
 
@@ -54,6 +80,8 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
                     roundScore={roundScore}
                     correctLanguage={language} 
                     guessLanguage={guess}
+                    traversals={traversals}
+                    setTraversals={setTraversals}
                 />
                 <LanguageTree 
                     languageData={languageData} 
@@ -63,6 +91,8 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
                     setScore={setScore}
                     roundScore={roundScore}
                     setRoundScore={setRoundScore}
+                    traversals={traversals}
+                    setTraversals={setTraversals}
                 />
             </div>
         </div>

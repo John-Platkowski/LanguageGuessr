@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import GameScene from './components/GameScene.jsx'
 import TreeScene from './components/TreeScene.jsx'
+import FinalScoreScene from './components/FinalScoreScene.jsx'
 import languageData from './language-tree.json'
 
 function App() 
@@ -13,6 +14,8 @@ function App()
   const [guess, setGuess] = useState("")
   const [language, setLanguage] = useState("")
   const [roundScore, setRoundScore] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [traversals, setTraversals] = useState(0)
 
   // Recursive function to find all languages with dictionaries
   const getAllLanguages = (data) => 
@@ -90,7 +93,10 @@ function App()
     allLanguages,
     allLanguageNames,
     roundScore,
-    setRoundScore
+    setRoundScore,
+    traversals,
+    setTraversals,
+    userId
   }
 
   /*(useEffect(() => 
@@ -161,6 +167,7 @@ useEffect(() =>
     <>
       {currentScene === "game" && <GameScene {...sceneProps} />}
       {currentScene === "tree" && <TreeScene {...sceneProps} />}
+      {currentScene === "end" && <FinalScoreScene {...sceneProps} />}
     </>
   )
 

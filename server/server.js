@@ -69,9 +69,9 @@ async function updateScore(id, score)
 {
 
     // Validate score range
-    if (score < 0 || score > 20) 
+    if (score < 0 || score > 100) 
     {
-        throw new Error(`Invalid score: ${score}. Score must be between 0 and 20.`);
+        throw new Error(`Invalid score: ${score}. Score must be between 0 and 100.`);
     }
 
     // Validate that score is a number
@@ -85,7 +85,7 @@ async function updateScore(id, score)
         SET played_today = TRUE,
             daily_score = $2,
             total_games = total_games + 1,
-            avg_score = ((avg_score * (total_games) + $1) / (total_games + 1))
+            avg_score = ((avg_score * (total_games) + $1) / total_games)
         WHERE id = $1
         RETURNING *;
     `;
@@ -105,29 +105,55 @@ async function updateScore(id, score)
 // id and word integer
 async function updateProgress(id, wordNumber) 
 {
-    const query = 
-    `
-    UPDATE users
-    SET progress_today = $2-1,
-    WHERE id = $1,
-    RETURNING *;
+    const query = `
+        UPDATE users
+        SET progress_today = $2
+        WHERE id = $1
+        RETURNING *;
     `
 
     try
     {
         const result = await db.query(query, [id, wordNumber]);
         return result.rows[0];
-    }catch (err){
+    } catch (err){
         console.error("Error updating progress: ", err);
         throw err;
     }
 }
 
-async function updateUsername(id, newName) 
+async function getUser(id) 
 {
-    
+    const query = `
+        SELECT * FROM users WHERE id = $1;
+    `
+
+    try
+    {
+        const result = await db.query(query, [id]);
+        return result.rows[0];
+    } catch (err) {
+        console.error("Error getting user: ", err);
+        throw err;
+    }
 }
 
+app.get("/api/user/:id", async (req, res) => 
+{
+    const { id } = req.params;
+
+    try
+    {
+        const user = await getUser(id);
+        if (!user) 
+        {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to get user" });
+    }
+});
 
 app.post("/api/new-user", async (req, res) =>
 {
@@ -157,6 +183,20 @@ app.post("/api/update-score", async (req, res) =>
         res.status(500).json({ error: "Failed to update score" });
     }
     
+});
+
+app.post("/api/update-progress", async (req, res) => 
+{
+    const { id, wordNumber } = req.body;
+
+    try
+    {
+        const user = await updateProgress(id, wordNumber);
+        res.json(user);
+    } catch (err) {
+        console.error("Update progress error:", err);
+        res.status(500).json({ error: "Failed to update progress" });
+    }
 });
 
 
