@@ -133,25 +133,26 @@ useEffect(() =>
   {
     let id = localStorage.getItem("userId");
     // First time login; no id
-    if(!id)
-    {
-      const res = await fetch("http://localhost:5000/api/new-user", { method: "POST" })
-        .then((res) => res.json())
-        .then((data) => {
-        localStorage.setItem("userId", data.id); // save UUID locally
-        console.log("New user created:", data);
-      })
-      .catch((err) => console.error("Failed to create user", err));
-      const data = await res.json();
-      id = data.id;
-      localStorage.setItem("userId", id);
-    } else {
-      console.log("Existing user:", userId);
-    }
+    if (!id) {
+          try {
+            const res = await fetch("http://localhost:5000/api/new-user", { method: "POST" });
+            const data = await res.json();
 
-    setUserId(id);
-    return id;
-  };
+            localStorage.setItem("userId", data.id);
+            console.log("New user created:", data);
+
+            id = data.id;
+          } catch (err) {
+            console.error("Failed to create user", err);
+          }
+        } else {
+          console.log("Existing user:", id);
+        }
+
+        setUserId(id);
+        return id;
+      };
+
   
   initUser();
 }, []);

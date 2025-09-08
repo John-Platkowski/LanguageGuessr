@@ -53,7 +53,7 @@ app.post("/api/users", async (req, res) =>
 {
     try 
     {
-        const result = await pool.query(
+        const result = await db.query(
         "INSERT INTO users DEFAULT VALUES RETURNING *"
         );
         res.json(result.rows[0]); // should contain the new row
@@ -139,7 +139,7 @@ app.post("/api/new-user", async (req, res) =>
         res.json({ id: newID });
         console.log(`new id: ${newID}`);
     } catch (err) {
-        console.error(err);
+        console.error("DB insert error: ",err.message);
         res.status(500).json({ error: "Database insert failed" });
     }
 });
@@ -164,11 +164,11 @@ app.delete("/api/debug/reset-users", async (req, res) =>
 {
     try 
     {
-        await pool.query("TRUNCATE TABLE users RESTART IDENTITY CASCADE;");
+        await db.query("TRUNCATE TABLE users CASCADE;");
         res.json({ success: true, message: "All users reset." });
     } catch (err) {
         console.error("Error resetting users:", err);
-        res.status(500).json({ success: false, error: "DB reset failed" });
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -187,7 +187,7 @@ app.post("/api/debug/populate-users", async (req, res) =>
             const totalGames = Math.floor(Math.random() * 20) + 1;
             const avgScore = (dailyScore / totalGames).toFixed(2);
 
-            const result = await pool.query(
+            const result = await db.query(
                 `INSERT INTO users (played_today, daily_score, avg_score, total_games) 
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`,
