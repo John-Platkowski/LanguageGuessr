@@ -205,7 +205,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
                     try 
                     {
-                        const res = await fetch("/api/debug/reset-users", { method: "DELETE" });
+                        const res = await fetch("http://localhost:5000/api/debug/reset-users", { method: "DELETE" });
                         const data = await res.json();
 
                         // Clear localStorage userId
@@ -220,7 +220,34 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     }}
                     className="px-3 py-1 border-2 border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
                 >
-                    ⚠ Reset All Users (Debug)
+                    Reset All Users (Debug)
+                </button>
+                </div>
+                {/* Debug populate button */}
+                <div className="mt-2">
+                <button
+                    onClick={async () => 
+                    {
+                        const count = parseInt(prompt("How many fake users?"), 10) || 5;
+                        try 
+                        {
+                            const res = await fetch("http://localhost:5000/api/debug/populate-users", 
+                            {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ count })
+                            });
+                            const data = await res.json();
+                            console.log("Populate result:", data);
+                            alert(`Inserted ${data.inserted} fake users.`);
+                        } catch (err) {
+                            console.error("Populate failed:", err);
+                            alert("Populate failed. Check console.");
+                        }
+                    }}
+                    className="px-3 py-1 border-2 border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors"
+                >
+                    Populate Fake Users (Debug)
                 </button>
                 </div>
             </div>

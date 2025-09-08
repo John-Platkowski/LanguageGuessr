@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import db from "./db.js";
+import { faker } from '@faker-js/faker';
 
 dotenv.config();
 const app = express();
@@ -65,6 +66,19 @@ app.post("/api/users", async (req, res) =>
 // After game is finished, query database with a new score and return user object row if valid request
 async function updateScore(id, score) 
 {
+
+    // Validate score range
+    if (score < 0 || score > 20) 
+    {
+        throw new Error(`Invalid score: ${score}. Score must be between 0 and 20.`);
+    }
+
+    // Validate that score is a number
+    if (typeof score !== 'number' || isNaN(score)) 
+    {
+        throw new Error(`Invalid score type: ${typeof score}. Score must be a number.`);
+    }
+
     const query = `
         UPDATE users
         SET played_today = TRUE,
@@ -155,6 +169,39 @@ app.delete("/api/debug/reset-users", async (req, res) =>
     } catch (err) {
         console.error("Error resetting users:", err);
         res.status(500).json({ success: false, error: "DB reset failed" });
+    }
+});
+
+
+// Debug: populate with random users
+app.post("/api/debug/populate-users", async (req, res) => 
+{
+    try 
+    {
+        const count = req.body.count || 5; // default to 5 fake users
+
+        const insertedUsers = [];
+        for (let i = 0; i < count; i++) 
+        {
+            const dailyScore = Math.floor(Math.random() * 20);
+            const totalGames = Math.floor(Math.random() * 20) + 1;
+            const avgScore = (dailyScore / totalGames).toFixed(2);
+
+            const result = await pool.query(
+                `INSERT INTO users (played_today, daily_score, avg_score, total_games) 
+                VALUES ($1, $2, $3, $4)
+                RETURNING *`,
+                [Math.random() > 0.5, dailyScore, avgScore, totalGames]
+            );
+
+            insertedUsers.push(result.rows[0]);
+        }
+
+        res.json({ success: true, inserted: insertedUsers.length, users: insertedUsers });
+        
+    } catch (err) {
+        console.error("Populate failed:", err);
+        res.status(500).json({ error: "DB populate failed" });
     }
 });
 
