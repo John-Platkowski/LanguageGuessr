@@ -40,13 +40,14 @@ app.get("/api/test-db", async (req, res) =>
 
 app.get("/api/users", async (req,res)=>
 {
-  try {
-    const result = await db.query("SELECT * FROM users");
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "DB query failed" });
-  }
+    try 
+    {
+        const result = await db.query("SELECT * FROM users");
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "DB query failed" });
+    }
 });
 
 app.post("/api/users", async (req, res) => 

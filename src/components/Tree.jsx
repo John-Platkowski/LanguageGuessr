@@ -229,9 +229,17 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
     const calculateScore = (correctPath, guessPath) => 
     {
         if (!correctPath || !guessPath) return 0;
-        // Find index of lowest common ancestor
+        
+        // If both languages are the same, full points
+        if (correctPath[correctPath.length - 1] === guessPath[guessPath.length - 1]) 
+        {
+            return 20;
+        }
+        
+        // Find the Lowest Common Ancestor (LCA)
         let lcaIndex = -1;
         const minLength = Math.min(correctPath.length, guessPath.length);
+        
         for (let i = 0; i < minLength; i++) 
         {
             if (correctPath[i] === guessPath[i]) 
@@ -241,22 +249,54 @@ function LanguageTree({ languageData, correctLanguage, guessLanguage, score, set
                 break;
             }
         }
-
-        // Distance = steps up from guess to LCA + steps up from correct to LCA
-        const traversals = (correctPath.length - (lcaIndex + 1)) + (guessPath.length - (lcaIndex + 1));
-
-        return Math.max(20 - traversals, 0);
+        
+        // Calculate distance from correct language to LCA
+        // If no common ancestor (lcaIndex = -1), distance is full path length - 1
+        const correctToLCA = lcaIndex === -1 ? correctPath.length - 1 : correctPath.length - 1 - lcaIndex;
+        
+        // Calculate distance from guess language to LCA  
+        const guessToLCA = lcaIndex === -1 ? guessPath.length : guessPath.length - 1 - lcaIndex;
+        
+        // Total distance is the sum of both distances
+        const totalDistance = correctToLCA + guessToLCA;
+        
+        // Score decreases by 2 for each step of distance
+        const score = Math.max(20 - (totalDistance * 2), 0);
+        
+        return score;
     };
 
+    const hasScoredRef = useRef(false);
+
+    const handleScoring = () => 
+    {
+        if (correctLanguage && guessLanguage && !hasScoredRef.current) 
+        {
+            const correctPath = getPath(languageData, correctLanguage);
+            const guessPath = getPath(languageData, guessLanguage);
+            const newPoints = calculateScore(correctPath, guessPath);
+            
+            console.log('newPoints calculated:', newPoints);
+            console.log('about to call setScore...');
+            
+            setScore(prevScore => {
+                console.log('setScore: prevScore =', prevScore, ', adding =', newPoints, ', new total =', prevScore + newPoints);
+                return prevScore + newPoints;
+            });
+            setRoundScore(newPoints);
+            hasScoredRef.current = true;
+            
+            console.log('=== END HANDLE SCORING ===');
+        } else {
+            console.log('Already scored or missing languages, not scoring');
+        }
+    };
+
+    // Call scoring when the component first renders with both languages
     useEffect(() => 
     {
-        const correctPath = getPath(languageData, correctLanguage);
-        const guessPath = getPath(languageData, guessLanguage);
-        const newPoints = calculateScore(correctPath, guessPath);
-        setScore(prevScore => prevScore + newPoints);
-        setRoundScore(newPoints);
-    }, [correctLanguage, guessLanguage]);
-    console.log(scoringData)
+        handleScoring();
+    }, []);
 
     return (
         <TreeContainer>
