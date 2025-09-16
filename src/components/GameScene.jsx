@@ -67,7 +67,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
             
             try 
             {
-                const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
+                const response = await fetch(`http://localhost:5000/api/user/${userId}`);
                 const userData = await response.json();
                 setUserProgress(userData);
                 
@@ -126,7 +126,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         try 
         {
-            await fetch("https://lingo-guess.onrender.com/api/update-progress", 
+            await fetch("http://localhost:5000/api/update-progress", 
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -252,7 +252,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
                         try 
                         {
-                            const res = await fetch("https://lingo-guess.onrender.com/api/debug/reset-users", { method: "DELETE" });
+                            const res = await fetch("http://localhost:5000/api/debug/reset-users", { method: "DELETE" });
                             const data = await res.json();
 
                             // Clear localStorage userId
@@ -278,7 +278,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                         const count = parseInt(prompt("How many fake users?"), 10) || 5;
                         try 
                         {
-                            const res = await fetch("https://lingo-guess.onrender.com/api/debug/populate-users", 
+                            const res = await fetch("http://localhost:5000/api/debug/populate-users", 
                             {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
