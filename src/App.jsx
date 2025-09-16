@@ -101,7 +101,7 @@ function App()
 
   /*(useEffect(() => 
   {
-    fetch('http://localhost:5000/api/users')
+    fetch('https://lingo-guess.onrender.com/api/users')
       .then(res => res.json())
       .then(data => console.log(data))
       .catch(err => console.error(err));
@@ -111,7 +111,7 @@ function App()
     {
       if (score === 0||!userId) return;
 
-      fetch("http://localhost:5000/api/update-score",
+      fetch("https://lingo-guess.onrender.com/api/update-score",
       {
         method: "POST",
         headers: {
@@ -141,7 +141,7 @@ useEffect(() =>
     // First time login; no id
     if (!id) {
           try {
-            const res = await fetch("http://localhost:5000/api/new-user", { method: "POST" });
+            const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" });
             const data = await res.json();
 
             localStorage.setItem("userId", data.id);
