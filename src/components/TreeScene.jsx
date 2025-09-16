@@ -41,11 +41,11 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
         // Update progress on server before returning to game
         try 
         {
-            const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+            const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
             const userData = await response.json();
             const newProgress = (userData.progress_today || 0) + 1;
             
-            await fetch("http://localhost:5000/api/update-progress", 
+            await fetch("https://lingo-guess.onrender.com/api/update-progress", 
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
