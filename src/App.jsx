@@ -54,6 +54,19 @@ function App()
         }
     }
     
+    useEffect(() => {
+      if (!userId) {
+        const storedId = localStorage.getItem('userId');
+        if (storedId) {
+          setUserId(storedId);
+        } else {
+          const newId = faker.string.uuid(); // Or crypto.randomUUID()
+          localStorage.setItem('userId', newId);
+          setUserId(newId);
+        }
+      }
+    }, [userId]);
+
     // Get root values and begin traversal
     const rootKeys = Object.keys(data)
     for (let i = 0; i < rootKeys.length; i++) 

@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker';
 dotenv.config();
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); 
 
 //const express = require('express');
 
@@ -62,6 +62,46 @@ app.post("/api/users", async (req, res) =>
         console.error("Error inserting user:", err);
         res.status(500).json({ error: "DB insert failed" });
     }
+});
+
+app.post("/api/daily-words", (req, res) => {
+  try {
+    const { languages, totalWords = 5 } = req.body;
+    if (!languages || !Array.isArray(languages)) {
+      return res.status(400).json({ error: "Invalid languages data" });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0); // Simple date seed
+
+    // Flatten all words
+    const allWords = [];
+    languages.forEach(lang => {
+      if (lang.dictionary && Array.isArray(lang.dictionary)) {
+        lang.dictionary.forEach(word => {
+          allWords.push({
+            word: word.word || '',
+            language: lang.name || '',
+            translation: word.translation || '',
+            meaning: word.definition_1 || "No definition available"
+          });
+        });
+      }
+    });
+
+    // Deterministic shuffle
+    for (let i = allWords.length - 1; i > 0; i--) {
+      const rand = (seed + i * 31) % (i + 1);
+      const j = Math.floor(rand);
+      [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+    }
+
+    const dailyBank = allWords.slice(0, Math.min(totalWords, allWords.length));
+    res.json(dailyBank);
+  } catch (err) {
+    console.error("Daily words error:", err);
+    res.status(500).json({ error: "Failed to generate daily words" });
+  }
 });
 
 

@@ -63,7 +63,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         const loadUserProgress = async () => 
         {
-            if (!userId) return;
+            if (!userId || userId === 'undefined') {
+                console.warn('userId not set—skipping progress load');
+                return;
+            }
             
             try 
             {
@@ -98,28 +101,28 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
     useEffect(() => {
     if (allLanguages && allLanguages.length > 0 && !isInitialized) {
-        const fetchWordBank = async () => {
+        const fetchDailyWords = async () => {
         try {
-            const response = await fetch("https://lingo-guess.onrender.com/api/daily-words", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ languages: allLanguages, totalWords })
+            const response = await fetch('https://lingo-guess.onrender.com/api/daily-words', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ languages: allLanguages, totalWords: 5 })
             });
-            if (!response.ok) throw new Error("Failed to fetch daily words");
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
             const data = await response.json();
             setWordBank(data);
             setIsInitialized(true);
         } catch (error) {
-            console.error("Failed to fetch word bank:", error);
+            console.error('Daily words fetch failed:', error);
             // Fallback to local
-            const fallbackBank = getWordBank(allLanguages);
-            setWordBank(fallbackBank);
+            const fallback = getWordBank(allLanguages);
+            setWordBank(fallback);
             setIsInitialized(true);
         }
         };
-        fetchWordBank();
+        fetchDailyWords();
     }
-    }, [allLanguages, isInitialized, totalWords]);
+    }, [allLanguages, isInitialized]);
 
     // Set up the first word when wordBank is ready
     useEffect(() => 
