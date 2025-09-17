@@ -64,6 +64,8 @@ app.post("/api/users", async (req, res) =>
     }
 });
 
+
+
 // After game is finished, query database with a new score and return user object row if valid request
 async function updateScore(id, score) 
 {
@@ -244,6 +246,63 @@ app.post("/api/debug/populate-users", async (req, res) =>
         console.error("Populate failed:", err);
         res.status(500).json({ error: "DB populate failed" });
     }
+});
+
+// Simple hash for date-based seed (deterministic random without extra deps)
+function hashDate(dateStr) {
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = (hash * 31 + dateStr.charCodeAt(i)) % Number.MAX_SAFE_INTEGER;
+  }
+  return hash;
+}
+
+// Seeded random function
+function seededRandom(seed) {
+  let t = seed += 0x6D2B79F5;
+  t = Math.imul(t ^ t >>> 15, t | 1);
+  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+}
+
+// API to generate daily word bank (POST to receive allLanguages)
+app.post("/api/daily-words", (req, res) => {
+  try {
+    const { languages, totalWords = 5 } = req.body; // allLanguages from frontend
+    if (!languages || !Array.isArray(languages)) {
+      return res.status(400).json({ error: "Invalid languages data" });
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const seed = hashDate(today);
+
+    // Flatten all words
+    const allWords = [];
+    languages.forEach(lang => {
+      lang.dictionary.forEach(word => {
+        allWords.push({
+          word: word.word,
+          language: lang.name,
+          translation: word.translation,
+          meaning: word.definition_1 || "No definition available"
+        });
+      });
+    });
+
+    // Deterministic shuffle with seed
+    for (let i = allWords.length - 1; i > 0; i--) {
+      const rand = seededRandom(seed + i);
+      const j = Math.floor(rand * (i + 1));
+      [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+    }
+
+    // Take first N after shuffle
+    const dailyBank = allWords.slice(0, Math.min(totalWords, allWords.length));
+    res.json(dailyBank);
+  } catch (err) {
+    console.error("Word bank error:", err);
+    res.status(500).json({ error: "Failed to generate daily words" });
+  }
 });
 
 const PORT = process.env.PORT || 5000;

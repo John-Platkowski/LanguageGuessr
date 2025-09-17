@@ -85,7 +85,8 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     }, [userId]);
 
     // Initialize word bank only once when allLanguages is available
-    useEffect(() => 
+    /*useEffect(() => 
+        
     {
         if (allLanguages && allLanguages.length > 0 && !isInitialized) 
         {
@@ -93,7 +94,32 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
             setWordBank(newWordBank)
             setIsInitialized(true)
         }
-    }, [allLanguages, isInitialized])
+    }, [allLanguages, isInitialized])*/
+
+    useEffect(() => {
+    if (allLanguages && allLanguages.length > 0 && !isInitialized) {
+        const fetchWordBank = async () => {
+        try {
+            const response = await fetch("https://lingo-guess.onrender.com/api/daily-words", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ languages: allLanguages, totalWords })
+            });
+            if (!response.ok) throw new Error("Failed to fetch daily words");
+            const data = await response.json();
+            setWordBank(data);
+            setIsInitialized(true);
+        } catch (error) {
+            console.error("Failed to fetch word bank:", error);
+            // Fallback to local
+            const fallbackBank = getWordBank(allLanguages);
+            setWordBank(fallbackBank);
+            setIsInitialized(true);
+        }
+        };
+        fetchWordBank();
+    }
+    }, [allLanguages, isInitialized, totalWords]);
 
     // Set up the first word when wordBank is ready
     useEffect(() => 
