@@ -74,8 +74,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 const userData = await response.json();
                 setUserProgress(userData);
                 
-                // Set word number based on progress (progress is 0-indexed, wordNumber is 1-indexed)
-                const currentWordNumber = (userData.progress_today || 0) + 1;
+                // Set word number based on progress
+                // progress_today is stored as 0-based index of how many words have been completed (0 = none done).
+                // To show the current word number to the user we want a 1-based value:
+                const currentWordNumber = (userData && typeof userData.progress_today === 'number') ? (userData.progress_today + 1) : 1;
                 setWordNumber(currentWordNumber);
                 
                 console.log('Loaded user progress:', userData);
@@ -127,10 +129,11 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     // Set up the first word when wordBank is ready
     useEffect(() => 
     {
-        if (wordBank.length > 0 && wordNumber === 1) {
+        if (wordBank.length > 0 && wordNumber === 1) 
+        {
             enterGame(wordBank)
         }
-    }, [wordBank, userProgress, wordNumber])
+    }, [wordBank, wordNumber])
     
 
     // Clear input field when component mounts (when returning to game scene)
@@ -141,7 +144,8 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
     const enterGame = (bank = wordBank) => 
     {
-        const currentWordData = bank[wordNumber - 1] // Convert 1-indexed to 0-indexed
+        const idx = Math.max(0, Math.min(bank.length - 1, wordNumber - 1)); // Convert 1-indexed to 0-indexed
+        const currentWordData = bank[idx];
         if (currentWordData) 
         {
             setLanguage(currentWordData.language)
@@ -195,7 +199,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         const newWordNumber = wordNumber + 1
         
-        if (newWordNumber <= (totalWords - 1) && (newWordNumber - 1) < wordBank.length) 
+        if (newWordNumber <= (totalWords) && (newWordNumber - 1) < wordBank.length) 
         {
             const nextWordIndex = newWordNumber - 1 // Convert to 0-based index
             const nextWordData = wordBank[nextWordIndex]
@@ -269,7 +273,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 <div className="text-[#70a861] text-lg font-serif mr-20">
                     Your score today is <span className="font-semibold text-[#5e814c]">{score} pt.</span>
                 </div>
-                {/* Debug reset button */}
+                
+                
+                {/*
+                {/* Debug reset button
                 <div className="mt-4">
                 <button
                     onClick={async () => 
@@ -299,7 +306,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     Reset All Users (Debug)
                 </button>
                 </div>
-                {/* Debug populate button */}
+                {/* Debug populate button
                 <div className="mt-2">
                 <button
                     onClick={async () => 
@@ -325,7 +332,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Populate Fake Users (Debug)
                 </button>
-                {/* Debug final score button */}
+                {/* Debug final score button
                 <div className="mt-2">
                 <button
                     onClick={() =>
@@ -338,8 +345,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Go to Final Score (Debug)
                 </button>
+                
                 </div>
                 </div>
+                */}
             </div>
         </div>
     )

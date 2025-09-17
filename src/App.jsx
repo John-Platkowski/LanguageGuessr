@@ -10,7 +10,7 @@ function App()
   
   // Shared state that multiple scenes might need
   const [score, setScore] = useState(0)
-  const [userId, setUserId] = useState(1);
+  const [userId, setUserId] = useState(null);
   const [guess, setGuess] = useState("")
   const [language, setLanguage] = useState("")
   const [roundScore, setRoundScore] = useState(0)
@@ -21,60 +21,27 @@ function App()
   const getAllLanguages = (data) => 
   {
     const languages = []
-      
-      const traverse = (obj, path) => 
-      {
-        // Check if the object exists and is valid
-        if (obj && typeof obj === 'object') 
-        {
-            // Check if the object has a dictionary attribute, if the dictionary is an array, and the dictionary has words
-            // Nodes with dictionaries are languages
-            if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
-            {
-                // Append a language object to languages
-                languages.push({
-                    path: path.join(", "),
-                    name: path[path.length - 1],
-                    dictionary: obj.dictionary
-                })
-            }
-            // Search through children of current object
-            const objectKeys = Object.keys(obj)
-            for (let i = 0; i < objectKeys.length; i++) 
-            {
-                const currentKey = objectKeys[i]
-                const currentValue = obj[currentKey]
-                if (currentKey !== 'dictionary') 
-                {
-                    // Append the current key to the existing path and traverse
-                    const newPath = [...path, currentKey]
-                    traverse(currentValue, newPath)
-                }
-            }
-        }
-    }
-    
-    useEffect(() => {
-      if (!userId) {
-        const storedId = localStorage.getItem('userId');
-        if (storedId) {
-          setUserId(storedId);
-        } else {
-          const newId = faker.string.uuid(); // Or crypto.randomUUID()
-          localStorage.setItem('userId', newId);
-          setUserId(newId);
-        }
-      }
-    }, [userId]);
-
-    // Get root values and begin traversal
-    const rootKeys = Object.keys(data)
-    for (let i = 0; i < rootKeys.length; i++) 
+    const traverse = (obj, path) => 
     {
-        const rootKey = rootKeys[i]
-        const rootValue = data[rootKey]
-        traverse(rootValue, [rootKey])
+      if (!obj || typeof obj !== 'object')
+      {
+        return;
+      }
+      if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
+      {
+        languages.push({
+          path: path.join(", "),
+          name: path[path.length - 1],
+          dictionary: obj.dictionary
+        })
+      }
+      Object.keys(obj).forEach(key => 
+      {
+        if (key === 'dictionary') return
+        traverse(obj[key], [...path, key])
+      })
     }
+    Object.keys(data).forEach(root => traverse(data[root], [root]))
     return languages
   }
 
@@ -86,6 +53,56 @@ function App()
 
   const allLanguages = getAllLanguages(languageData)
   const allLanguageNames = getLanguageNames(allLanguages)
+
+  // Initialize or restore userId on mount
+  useEffect(() => 
+  {
+    const initUser = async () => {
+      let id = localStorage.getItem("userId")
+      if (!id) {
+        try {
+          const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
+          const data = await res.json()
+          id = data.id
+          localStorage.setItem("userId", id)
+          console.log("New user created:", id)
+        } catch (err) {
+          console.error("Failed to create user:", err)
+          // fallback to client-side id so UI still works
+          id = crypto?.randomUUID?.() || `local-${Date.now()}`
+          localStorage.setItem("userId", id)
+          console.log("Falling back to client-generated userId:", id)
+        }
+      } else {
+        console.log("Existing user:", id)
+      }
+      setUserId(id)
+    }
+    initUser()
+  }, [])
+
+  // Update server score when score changes (and userId is available)
+  useEffect(() => 
+  {
+    if (!userId) 
+    {
+      return;
+    }
+    if (score === 0)
+    {
+      return;
+    }
+    const payload = { id: userId, newScore: score }
+    fetch("https://lingo-guess.onrender.com/api/update-score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(data => console.log("Server response:", data))
+      .catch(err => console.error("Error updating score:", err))
+  }, [score, userId])
+
 
   // Scene navigation functions
   const navigateToScene = (sceneName) => 
@@ -152,25 +169,27 @@ useEffect(() =>
   {
     let id = localStorage.getItem("userId");
     // First time login; no id
-    if (!id) {
-          try {
-            const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" });
-            const data = await res.json();
+    if (!id) 
+    {
+      try 
+      {
+        const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" });
+        const data = await res.json();
 
-            localStorage.setItem("userId", data.id);
-            console.log("New user created:", data);
+        localStorage.setItem("userId", data.id);
+        console.log("New user created:", data);
 
-            id = data.id;
-          } catch (err) {
-            console.error("Failed to create user", err);
-          }
-        } else {
-          console.log("Existing user:", id);
-        }
+        id = data.id;
+      } catch (err) {
+        console.error("Failed to create user", err);
+      }
+    } else {
+      console.log("Existing user:", id);
+    }
 
-        setUserId(id);
-        return id;
-      };
+    setUserId(id);
+    return id;
+  };
 
   
   initUser();
