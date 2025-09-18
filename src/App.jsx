@@ -10,58 +10,39 @@ function App()
   
   // Shared state that multiple scenes might need
   const [score, setScore] = useState(0)
-  const [userId, setUserId] = useState(1);
+  const [userId, setUserId] = useState(null);
   const [guess, setGuess] = useState("")
   const [language, setLanguage] = useState("")
   const [roundScore, setRoundScore] = useState(0)
   const [progress, setProgress] = useState(0)
   const [traversals, setTraversals] = useState(0)
+  const [shouldAdvanceWord, setShouldAdvanceWord] = useState(false)
 
   // Recursive function to find all languages with dictionaries
   const getAllLanguages = (data) => 
   {
     const languages = []
-      
-      const traverse = (obj, path) => 
-      {
-        // Check if the object exists and is valid
-        if (obj && typeof obj === 'object') 
-        {
-            // Check if the object has a dictionary attribute, if the dictionary is an array, and the dictionary has words
-            // Nodes with dictionaries are languages
-            if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
-            {
-                // Append a language object to languages
-                languages.push({
-                    path: path.join(", "),
-                    name: path[path.length - 1],
-                    dictionary: obj.dictionary
-                })
-            }
-            // Search through children of current object
-            const objectKeys = Object.keys(obj)
-            for (let i = 0; i < objectKeys.length; i++) 
-            {
-                const currentKey = objectKeys[i]
-                const currentValue = obj[currentKey]
-                if (currentKey !== 'dictionary') 
-                {
-                    // Append the current key to the existing path and traverse
-                    const newPath = [...path, currentKey]
-                    traverse(currentValue, newPath)
-                }
-            }
-        }
-    }
-    
-    // Get root values and begin traversal
-    const rootKeys = Object.keys(data)
-    for (let i = 0; i < rootKeys.length; i++) 
+    const traverse = (obj, path) => 
     {
-        const rootKey = rootKeys[i]
-        const rootValue = data[rootKey]
-        traverse(rootValue, [rootKey])
+      if (!obj || typeof obj !== 'object')
+      {
+        return;
+      }
+      if (obj.dictionary && Array.isArray(obj.dictionary) && obj.dictionary.length > 0) 
+      {
+        languages.push({
+          path: path.join(", "),
+          name: path[path.length - 1],
+          dictionary: obj.dictionary
+        })
+      }
+      Object.keys(obj).forEach(key => 
+      {
+        if (key === 'dictionary') return
+        traverse(obj[key], [...path, key])
+      })
     }
+    Object.keys(data).forEach(root => traverse(data[root], [root]))
     return languages
   }
 
@@ -74,9 +55,145 @@ function App()
   const allLanguages = getAllLanguages(languageData)
   const allLanguageNames = getLanguageNames(allLanguages)
 
+  // Initialize or restore userId on mount
+  useEffect(() => 
+  {
+    console.log("Attempting to init user.")
+      const initUser = async () => 
+      {
+        let id = localStorage.getItem("userId")
+        if (!id || id === "undefined") 
+        {
+          try 
+          {
+            const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
+            const data = await res.json()
+            id = data.id
+            localStorage.setItem("userId", id)
+            console.log("New user created:", id)
+          } catch (err) {
+            console.error("Failed to create user:", err)
+            // fallback to client-side id so UI still works
+            id = crypto?.randomUUID?.() || `local-${Date.now()}`
+            localStorage.setItem("userId", id)
+            console.log("Falling back to client-generated userId:", id)
+          }
+        } else {
+          console.log("Existing user:", id)
+        }
+        setUserId(id)
+        localStorage.setItem("userId", id)
+      }
+    initUser()
+  }, [])
+
+  // Update server score when score changes (and userId is available)
+  useEffect(() => 
+  {
+    if (!userId || userId === 'undefined') 
+    {
+      return;
+    }
+    
+    // Only update if score is a valid number (including 0)
+    if (typeof score !== 'number' || isNaN(score)) 
+    {
+      return;
+    }
+
+    const updateServerScore = async () => 
+    {
+      const payload = { id: userId, newScore: score }
+      
+      try 
+      {
+        const response = await fetch("https://lingo-guess.onrender.com/api/update-score", 
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+        
+        if (!response.ok) 
+        {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Server error')
+        }
+        
+        const data = await response.json()
+        console.log("Server score updated:", data)
+      } catch (err) {
+        console.error("Error updating score:", err)
+      }
+    }
+
+    // Only update score if it's greater than 0
+    if (score > 0) 
+    {
+      updateServerScore()
+    }
+  }, [score, userId])
+
+  useEffect(() => 
+  {
+    const checkCompletion = async () => 
+    {
+      if (!userId || userId === 'undefined' || currentScene !== 'game') 
+      {
+        return;
+      }
+      
+      try 
+      {
+        const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
+        const userData = await response.json();
+        
+        // If user has completed all 5 words
+        if (userData && userData.progress_today >= 4) 
+        {
+          console.log('User has completed all words, redirecting to final screen');
+          setCurrentScene('end');
+        }
+      } catch (error) {
+        console.error('Failed to check user completion:', error);
+      }
+    };
+
+    checkCompletion();
+  }, [userId, currentScene]);
+
   // Scene navigation functions
   const navigateToScene = (sceneName) => 
   {
+    // When going from tree back to game, signal that word should advance
+    if (currentScene === "tree" && sceneName === "game") 
+    {
+      setShouldAdvanceWord(true)
+    }
+    // if going from tree to game but it's the final word (5/5), go to end instead
+    if (currentScene === "tree" && sceneName === "game" && shouldAdvanceWord) 
+    {
+      // Check if we're completing the last word by looking at current progress
+      fetch(`https://lingo-guess.onrender.com/api/user/${userId}`)
+        .then(res => res.json())
+        .then(userData => 
+        {
+          // If progress_today will be 4 after advancement (meaning 5 words completed)
+          if (userData && userData.progress_today >= 4) 
+          {
+            setShouldAdvanceWord(false) // Reset the flag
+            setCurrentScene("end")
+            return
+          }
+          setCurrentScene(sceneName)
+        })
+        .catch(err => 
+        {
+          console.error('Error checking completion:', err)
+          setCurrentScene(sceneName) // Fallback to normal navigation
+        })
+      return
+    }
     setCurrentScene(sceneName)
   }
 
@@ -96,72 +213,18 @@ function App()
     setRoundScore,
     traversals,
     setTraversals,
-    userId
+    userId,
+    shouldAdvanceWord,
+    setShouldAdvanceWord
   }
 
   /*(useEffect(() => 
   {
-    fetch('http://localhost:5000/api/users')
+    fetch('https://lingo-guess.onrender.com/api/users')
       .then(res => res.json())
       .then(data => console.log(data))
       .catch(err => console.error(err));
   }, []);*/
-
-  useEffect(() => 
-    {
-      if (score === 0||!userId) return;
-
-      fetch("http://localhost:5000/api/update-score",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",  
-        },
-        body:JSON.stringify(
-          {
-            id: userId,
-            newScore: score,
-          }
-        ),
-      })
-      .then((res) => res.json())
-      .then((data) => console.log("Server response:", data))
-      .catch((err) => console.error("Error updating score:",err))
-  }
-),[score, userId]
-
-
-
-useEffect(() =>
-{
-  //ID generator for new users, stored on browser
-  const initUser = async () =>
-  {
-    let id = localStorage.getItem("userId");
-    // First time login; no id
-    if (!id) {
-          try {
-            const res = await fetch("http://localhost:5000/api/new-user", { method: "POST" });
-            const data = await res.json();
-
-            localStorage.setItem("userId", data.id);
-            console.log("New user created:", data);
-
-            id = data.id;
-          } catch (err) {
-            console.error("Failed to create user", err);
-          }
-        } else {
-          console.log("Existing user:", id);
-        }
-
-        setUserId(id);
-        return id;
-      };
-
-  
-  initUser();
-}, []);
 
   return (
     <>

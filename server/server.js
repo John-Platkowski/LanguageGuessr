@@ -6,8 +6,14 @@ import { faker } from '@faker-js/faker';
 
 dotenv.config();
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.options('/api/daily-words', cors())
+app.use(cors({
+    origin: 'https://lingoguess.vercel.app',
+    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+}));
+app.use(express.json({ limit: '10mb' })); 
 
 //const express = require('express');
 
@@ -64,6 +70,55 @@ app.post("/api/users", async (req, res) =>
     }
 });
 
+app.post("/api/daily-words", (req, res) => 
+{
+    try 
+    {
+        const { languages, totalWords = 5 } = req.body;
+        if (!languages || !Array.isArray(languages)) 
+        {
+            return res.status(400).json({ error: "Invalid languages data" });
+        }
+        
+        const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+        // Sum year + month + day
+        const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0); 
+
+        // Flatten all words
+        const allWords = [];
+        languages.forEach(lang => 
+        {
+            if (lang.dictionary && Array.isArray(lang.dictionary)) 
+            {
+                lang.dictionary.forEach(word => 
+                {
+                    allWords.push({
+                        word: word.word || '',
+                        language: lang.name || '',
+                        translation: word.translation || '',
+                        meaning: word.definition_1 || "No definition available"
+                    });
+                });
+            }
+        });
+
+        // Deterministic shuffle using Fisher Yates algorithm
+        for (let i = allWords.length - 1; i > 0; i--) 
+        {
+            const j = (seed + i) % (i + 1);
+            [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+        }
+        // Take first N words
+        const dailyBank = allWords.slice(0, Math.min(totalWords, allWords.length));
+        res.json(dailyBank);
+    } catch (err) {
+        console.error("Daily words error:", err);
+        res.status(500).json({ error: "Failed to generate daily words" });
+    }
+});
+
+
+
 // After game is finished, query database with a new score and return user object row if valid request
 async function updateScore(id, score) 
 {
@@ -79,22 +134,28 @@ async function updateScore(id, score)
     {
         throw new Error(`Invalid score type: ${typeof score}. Score must be a number.`);
     }
-
+    // Coalesce returns the first non null element of the arguments
+    // Explicitly casts the type using ::numeric
     const query = `
         UPDATE users
         SET played_today = TRUE,
-            daily_score = $2,
-            total_games = total_games + 1,
-            avg_score = ((avg_score * (total_games) + $1) / total_games)
+            daily_score = $2::numeric,
+            avg_score = CASE 
+                WHEN total_games IS NULL OR total_games = 0 THEN $2::numeric
+                ELSE ((COALESCE(avg_score, 0::numeric) * total_games + $2::numeric) / (total_games + 1))
+                END,
+            total_games = COALESCE(total_games, 0) + 1
         WHERE id = $1
         RETURNING *;
     `;
 
     const values = [id, score];
 
-    try
+    try 
     {
+        console.log("updateScore called with:", id, score, typeof score);
         const result = await db.query(query, values);
+        console.log("DB result:", result.rows);
         return result.rows[0];
     } catch (err) {
         console.error("Error updating score: ", err);
@@ -116,7 +177,7 @@ async function updateProgress(id, wordNumber)
     {
         const result = await db.query(query, [id, wordNumber]);
         return result.rows[0];
-    } catch (err){
+    } catch (err) {
         console.error("Error updating progress: ", err);
         throw err;
     }
@@ -151,6 +212,7 @@ app.get("/api/user/:id", async (req, res) =>
         }
         res.json(user);
     } catch (err) {
+        console.error("Get user error: ", err);
         res.status(500).json({ error: "Failed to get user" });
     }
 });
@@ -174,13 +236,18 @@ app.post("/api/new-user", async (req, res) =>
 app.post("/api/update-score", async (req, res) => 
 {
     const { id, newScore } = req.body;
-
+    // Validate whether the id and new score exist
+    if (!id || typeof newScore === 'undefined')
+    {
+        return res.status(400).json({ error: "Missing id or newScore" });
+    }
     try
     {
         const user = await updateScore(id, newScore);
         res.json(user);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update score" });
+        console.error("Update-score error:", err);   // full log
+        res.status(500).json({ error: err.message }); // send DB error to frontend
     }
     
 });
@@ -245,6 +312,8 @@ app.post("/api/debug/populate-users", async (req, res) =>
         res.status(500).json({ error: "DB populate failed" });
     }
 });
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -36,28 +36,32 @@ function TreeScene({ navigateToScene, guess, language, score, setScore, roundSco
     }, [navigateToScene, shortcutEnabled])
 
 
+    // const handleNextWord = async () => 
+    // {
+    //     // Update progress on server before returning to game
+    //     try 
+    //     {
+    //         const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
+    //         const userData = await response.json();
+    //         const newProgress = (userData.progress_today || 0) + 1;
+            
+    //         await fetch("https://lingo-guess.onrender.com/api/update-progress", 
+    //         {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({
+    //                 id: userId,
+    //                 wordNumber: newProgress
+    //             })
+    //         });
+    //     } catch (error) {
+    //         console.error('Failed to update progress:', error);
+    //     }
+        
+    //     navigateToScene("game");
+    // }
     const handleNextWord = async () => 
     {
-        // Update progress on server before returning to game
-        try 
-        {
-            const response = await fetch(`http://localhost:5000/api/user/${userId}`);
-            const userData = await response.json();
-            const newProgress = (userData.progress_today || 0) + 1;
-            
-            await fetch("http://localhost:5000/api/update-progress", 
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: userId,
-                    wordNumber: newProgress
-                })
-            });
-        } catch (error) {
-            console.error('Failed to update progress:', error);
-        }
-        
         navigateToScene("game");
     }
 

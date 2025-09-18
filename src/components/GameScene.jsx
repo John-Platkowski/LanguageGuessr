@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import AutoCompleteInput from './AutocompleteInputField'
 
-function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId, shouldAdvanceWord, setShouldAdvanceWord})
 {
     const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
     const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
@@ -63,16 +63,21 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         const loadUserProgress = async () => 
         {
-            if (!userId) return;
+            if (!userId || userId === 'undefined') {
+                console.warn('userId not set; skipping progress load');
+                return;
+            }
             
             try 
             {
-                const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+                const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
                 const userData = await response.json();
                 setUserProgress(userData);
                 
-                // Set word number based on progress (progress is 0-indexed, wordNumber is 1-indexed)
-                const currentWordNumber = (userData.progress_today || 0) + 1;
+                // Set word number based on progress
+                // progress_today is stored as 0-based index of how many words have been completed (0 = none done).
+                // To show the current word number to the user we want a 1-based value:
+                const currentWordNumber = (userData && typeof userData.progress_today === 'number') ? (userData.progress_today + 1) : 1;
                 setWordNumber(currentWordNumber);
                 
                 console.log('Loaded user progress:', userData);
@@ -85,7 +90,8 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     }, [userId]);
 
     // Initialize word bank only once when allLanguages is available
-    useEffect(() => 
+    /*useEffect(() => 
+        
     {
         if (allLanguages && allLanguages.length > 0 && !isInitialized) 
         {
@@ -93,15 +99,48 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
             setWordBank(newWordBank)
             setIsInitialized(true)
         }
-    }, [allLanguages, isInitialized])
+    }, [allLanguages, isInitialized])*/
+
+    useEffect(() => 
+    {
+        if (allLanguages && allLanguages.length > 0 && !isInitialized) 
+        {
+            const fetchDailyWords = async () => 
+            {
+                try 
+                {
+                    const response = await fetch('https://lingo-guess.onrender.com/api/daily-words', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ languages: allLanguages, totalWords: 5 })
+                    });
+                    if (!response.ok)
+                    {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    setWordBank(data);
+                    setIsInitialized(true);
+                } catch (error) {
+                    console.error('Daily words fetch failed:', error);
+                    // Fallback to local
+                    const fallback = getWordBank(allLanguages);
+                    setWordBank(fallback);
+                    setIsInitialized(true);
+                }
+            };
+            fetchDailyWords();
+        }
+    }, [allLanguages, isInitialized]);
 
     // Set up the first word when wordBank is ready
     useEffect(() => 
     {
-        if (wordBank.length > 0 && wordNumber === 1) {
+        if (wordBank.length > 0 && wordNumber >= 1) 
+        {
             enterGame(wordBank)
         }
-    }, [wordBank, userProgress, wordNumber])
+    }, [wordBank, wordNumber])
     
 
     // Clear input field when component mounts (when returning to game scene)
@@ -112,7 +151,8 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
     const enterGame = (bank = wordBank) => 
     {
-        const currentWordData = bank[wordNumber - 1] // Convert 1-indexed to 0-indexed
+        const idx = Math.max(0, Math.min(bank.length - 1, wordNumber - 1)); // Convert 1-indexed to 0-indexed
+        const currentWordData = bank[idx];
         if (currentWordData) 
         {
             setLanguage(currentWordData.language)
@@ -126,7 +166,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         try 
         {
-            await fetch("http://localhost:5000/api/update-progress", 
+            await fetch("https://lingo-guess.onrender.com/api/update-progress", 
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -140,6 +180,18 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
     };
 
+    // Handle word advancement when returning from tree scene
+    useEffect(() => 
+    {
+        if (shouldAdvanceWord && wordBank.length > 0) 
+        {
+            const newWordNumber = wordNumber + 1
+            setWordNumber(newWordNumber)
+            setShouldAdvanceWord(false)
+            console.log(`Advanced to word ${newWordNumber} after tree scene`)
+        }
+    }, [shouldAdvanceWord, wordBank, wordNumber, setShouldAdvanceWord])
+
     const handleGuess = async (e) =>
     {
         if (e) 
@@ -152,21 +204,14 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
 
         await updateProgressOnServer(wordNumber);
-
-        nextWord()
-        if (wordNumber >= totalWords)
-        {
-            navigateToScene("end")
-        } else {
-            navigateToScene("tree")
-        }
+        navigateToScene("tree")
     }
 
     const nextWord = () => 
     {
         const newWordNumber = wordNumber + 1
         
-        if (newWordNumber <= (totalWords - 1) && (newWordNumber - 1) < wordBank.length) 
+        if (newWordNumber <= (totalWords) && (newWordNumber - 1) < wordBank.length) 
         {
             const nextWordIndex = newWordNumber - 1 // Convert to 0-based index
             const nextWordData = wordBank[nextWordIndex]
@@ -240,7 +285,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 <div className="text-[#70a861] text-lg font-serif mr-20">
                     Your score today is <span className="font-semibold text-[#5e814c]">{score} pt.</span>
                 </div>
-                {/* Debug reset button */}
+                
+                
+                {/*
+                {/* Debug reset button
                 <div className="mt-4">
                 <button
                     onClick={async () => 
@@ -252,7 +300,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
                         try 
                         {
-                            const res = await fetch("http://localhost:5000/api/debug/reset-users", { method: "DELETE" });
+                            const res = await fetch("https://lingo-guess.onrender.com/api/debug/reset-users", { method: "DELETE" });
                             const data = await res.json();
 
                             // Clear localStorage userId
@@ -270,7 +318,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     Reset All Users (Debug)
                 </button>
                 </div>
-                {/* Debug populate button */}
+                {/* Debug populate button
                 <div className="mt-2">
                 <button
                     onClick={async () => 
@@ -278,7 +326,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                         const count = parseInt(prompt("How many fake users?"), 10) || 5;
                         try 
                         {
-                            const res = await fetch("http://localhost:5000/api/debug/populate-users", 
+                            const res = await fetch("https://lingo-guess.onrender.com/api/debug/populate-users", 
                             {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
@@ -296,7 +344,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Populate Fake Users (Debug)
                 </button>
-                {/* Debug final score button */}
+                {/* Debug final score button
                 <div className="mt-2">
                 <button
                     onClick={() =>
@@ -309,8 +357,10 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Go to Final Score (Debug)
                 </button>
+                
                 </div>
                 </div>
+                */}
             </div>
         </div>
     )
