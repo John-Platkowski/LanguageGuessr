@@ -205,7 +205,6 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
 
         await updateProgressOnServer(wordNumber + 1);
 
-        nextWord()
         if (wordNumber >= totalWords)
         {
             navigateToScene("end")
