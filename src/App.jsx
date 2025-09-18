@@ -57,31 +57,32 @@ function App()
   // Initialize or restore userId on mount
   useEffect(() => 
   {
-    const initUser = async () => 
-    {
-      let id = localStorage.getItem("userId")
-      if (!id) 
+    console.log("Attempting to init user.")
+      const initUser = async () => 
       {
-        try 
+        let id = localStorage.getItem("userId")
+        if (!id) 
         {
-          const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
-          const data = await res.json()
-          id = data.id
-          localStorage.setItem("userId", id)
-          console.log("New user created:", id)
-        } catch (err) {
-          console.error("Failed to create user:", err)
-          // fallback to client-side id so UI still works
-          id = crypto?.randomUUID?.() || `local-${Date.now()}`
-          localStorage.setItem("userId", id)
-          console.log("Falling back to client-generated userId:", id)
+          try 
+          {
+            const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
+            const data = await res.json()
+            id = data.id
+            localStorage.setItem("userId", id)
+            console.log("New user created:", id)
+          } catch (err) {
+            console.error("Failed to create user:", err)
+            // fallback to client-side id so UI still works
+            id = crypto?.randomUUID?.() || `local-${Date.now()}`
+            localStorage.setItem("userId", id)
+            console.log("Falling back to client-generated userId:", id)
+          }
+        } else {
+          console.log("Existing user:", id)
         }
-      } else {
-        console.log("Existing user:", id)
+        setUserId(id)
+        localStorage.setItem("userId", id)
       }
-      setUserId(id)
-    }
-
     initUser()
   }, [])
 
