@@ -16,6 +16,7 @@ function App()
   const [roundScore, setRoundScore] = useState(0)
   const [progress, setProgress] = useState(0)
   const [traversals, setTraversals] = useState(0)
+  const [shouldAdvanceWord, setShouldAdvanceWord] = useState(false)
 
   // Recursive function to find all languages with dictionaries
   const getAllLanguages = (data) => 
@@ -137,6 +138,11 @@ function App()
   // Scene navigation functions
   const navigateToScene = (sceneName) => 
   {
+    // When going from tree back to game, signal that word should advance
+    if (currentScene === "tree" && sceneName === "game") 
+    {
+      setShouldAdvanceWord(true)
+    }
     setCurrentScene(sceneName)
   }
 
@@ -156,7 +162,9 @@ function App()
     setRoundScore,
     traversals,
     setTraversals,
-    userId
+    userId,
+    shouldAdvanceWord,
+    setShouldAdvanceWord
   }
 
   /*(useEffect(() => 

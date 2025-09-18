@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import AutoCompleteInput from './AutocompleteInputField'
 
-function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId})
+function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId, shouldAdvanceWord, setShouldAdvanceWord})
 {
     const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
     const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
@@ -180,6 +180,18 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
     };
 
+    // Handle word advancement when returning from tree scene
+    useEffect(() => 
+    {
+        if (shouldAdvanceWord && wordBank.length > 0) 
+        {
+            const newWordNumber = wordNumber + 1
+            setWordNumber(newWordNumber)
+            setShouldAdvanceWord(false)
+            console.log(`Advanced to word ${newWordNumber} after tree scene`)
+        }
+    }, [shouldAdvanceWord, wordBank, wordNumber, setShouldAdvanceWord])
+
     const handleGuess = async (e) =>
     {
         if (e) 
@@ -191,7 +203,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
             return
         }
 
-        await updateProgressOnServer(wordNumber);
+        await updateProgressOnServer(wordNumber + 1);
 
         nextWord()
         if (wordNumber >= totalWords)
