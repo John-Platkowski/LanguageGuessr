@@ -61,7 +61,7 @@ function App()
       const initUser = async () => 
       {
         let id = localStorage.getItem("userId")
-        if (!id) 
+        if (!id || id === "undefined") 
         {
           try 
           {
