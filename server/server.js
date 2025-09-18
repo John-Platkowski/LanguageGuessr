@@ -6,13 +6,9 @@ import { faker } from '@faker-js/faker';
 
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-    "https://lingoguess.vercel.app/",
-    "http://localhost:3000" // enable testing locally
-];
 app.options('/api/daily-words', cors())
 app.use(cors({
-    origin: allowedOrigins,
+    origin: 'https://lingoguess.vercel.app',
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
