@@ -57,10 +57,13 @@ function App()
   // Initialize or restore userId on mount
   useEffect(() => 
   {
-    const initUser = async () => {
+    const initUser = async () => 
+    {
       let id = localStorage.getItem("userId")
-      if (!id) {
-        try {
+      if (!id) 
+      {
+        try 
+        {
           const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
           const data = await res.json()
           id = data.id
@@ -78,6 +81,7 @@ function App()
       }
       setUserId(id)
     }
+
     initUser()
   }, [])
 
@@ -136,64 +140,6 @@ function App()
       .then(data => console.log(data))
       .catch(err => console.error(err));
   }, []);*/
-
-  useEffect(() => 
-    {
-      if (score === 0||!userId) return;
-
-      fetch("https://lingo-guess.onrender.com/api/update-score",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",  
-        },
-        body:JSON.stringify(
-          {
-            id: userId,
-            newScore: score,
-          }
-        ),
-      })
-      .then((res) => res.json())
-      .then((data) => console.log("Server response:", data))
-      .catch((err) => console.error("Error updating score:",err))
-  }
-),[score, userId]
-
-
-
-useEffect(() =>
-{
-  //ID generator for new users, stored on browser
-  const initUser = async () =>
-  {
-    let id = localStorage.getItem("userId");
-    // First time login; no id
-    if (!id) 
-    {
-      try 
-      {
-        const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" });
-        const data = await res.json();
-
-        localStorage.setItem("userId", data.id);
-        console.log("New user created:", data);
-
-        id = data.id;
-      } catch (err) {
-        console.error("Failed to create user", err);
-      }
-    } else {
-      console.log("Existing user:", id);
-    }
-
-    setUserId(id);
-    return id;
-  };
-
-  
-  initUser();
-}, []);
 
   return (
     <>

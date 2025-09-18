@@ -64,7 +64,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         const loadUserProgress = async () => 
         {
             if (!userId || userId === 'undefined') {
-                console.warn('userId not set—skipping progress load');
+                console.warn('userId not set; skipping progress load');
                 return;
             }
             
