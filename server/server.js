@@ -6,8 +6,16 @@ import { faker } from '@faker-js/faker';
 
 dotenv.config();
 const app = express();
-app.use(cors());
-app.options("/*", cors());
+const allowedOrigins = [
+    "https://lingo-guess.vercel.app",
+    "http://localhost:3000" // enable testing locally
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json({ limit: '10mb' })); 
 
 //const express = require('express');
