@@ -89,23 +89,48 @@ function App()
   // Update server score when score changes (and userId is available)
   useEffect(() => 
   {
-    if (!userId) 
+    if (!userId || userId === 'undefined') 
     {
       return;
     }
-    if (score === 0)
+    
+    // Only update if score is a valid number (including 0)
+    if (typeof score !== 'number' || isNaN(score)) 
     {
       return;
     }
-    const payload = { id: userId, newScore: score }
-    fetch("https://lingo-guess.onrender.com/api/update-score", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(data => console.log("Server response:", data))
-      .catch(err => console.error("Error updating score:", err))
+
+    const updateServerScore = async () => 
+    {
+      const payload = { id: userId, newScore: score }
+      
+      try 
+      {
+        const response = await fetch("https://lingo-guess.onrender.com/api/update-score", 
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+        
+        if (!response.ok) 
+        {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Server error')
+        }
+        
+        const data = await response.json()
+        console.log("Server score updated:", data)
+      } catch (err) {
+        console.error("Error updating score:", err)
+      }
+    }
+
+    // Only update score if it's greater than 0
+    if (score > 0) 
+    {
+      updateServerScore()
+    }
   }, [score, userId])
 
 
