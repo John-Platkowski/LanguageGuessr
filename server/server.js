@@ -10,7 +10,7 @@ const allowedOrigins = [
     "https://lingoguess.vercel.app/",
     "http://localhost:3000" // enable testing locally
 ];
-
+app.options('/api/daily-words', cors())
 app.use(cors({
     origin: allowedOrigins,
     methods: ["GET", "POST", "OPTIONS"],
