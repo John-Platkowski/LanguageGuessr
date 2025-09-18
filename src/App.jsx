@@ -134,6 +134,33 @@ function App()
     }
   }, [score, userId])
 
+  useEffect(() => 
+  {
+    const checkCompletion = async () => 
+    {
+      if (!userId || userId === 'undefined' || currentScene !== 'game') 
+      {
+        return;
+      }
+      
+      try 
+      {
+        const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`);
+        const userData = await response.json();
+        
+        // If user has completed all 5 words
+        if (userData && userData.progress_today >= 4) 
+        {
+          console.log('User has completed all words, redirecting to final screen');
+          setCurrentScene('end');
+        }
+      } catch (error) {
+        console.error('Failed to check user completion:', error);
+      }
+    };
+
+    checkCompletion();
+  }, [userId, currentScene]);
 
   // Scene navigation functions
   const navigateToScene = (sceneName) => 
