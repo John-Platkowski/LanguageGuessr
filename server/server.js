@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker';
 dotenv.config();
 const app = express();
 const allowedOrigins = [
-    "https://lingo-guess.vercel.app",
+    "https://lingoguess.vercel.app/",
     "http://localhost:3000" // enable testing locally
 ];
 
@@ -82,13 +82,15 @@ app.post("/api/daily-words", (req, res) =>
         {
             return res.status(400).json({ error: "Invalid languages data" });
         }
-        // Format to MMDDYYYY
-        const today = new Date().toISOString().split('T')[0];
+        
+        const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+        // Sum year + month + day
         const seed = today.split('-').reduce((a, b) => a + parseInt(b), 0); 
 
         // Flatten all words
         const allWords = [];
-        languages.forEach(lang => {
+        languages.forEach(lang => 
+        {
             if (lang.dictionary && Array.isArray(lang.dictionary)) 
             {
                 lang.dictionary.forEach(word => 
@@ -103,7 +105,7 @@ app.post("/api/daily-words", (req, res) =>
             }
         });
 
-        // Deterministic shuffle
+        // Deterministic shuffle using Fisher Yates algorithm
         for (let i = allWords.length - 1; i > 0; i--) 
         {
             const j = (seed + i) % (i + 1);
