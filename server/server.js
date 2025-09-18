@@ -116,6 +116,17 @@ app.post("/api/daily-words", (req, res) =>
 async function updateScore(id, score) 
 {
 
+    try 
+    {
+        console.log("updateScore called with:", id, score, typeof score);
+        const result = await db.query(query, values);
+        console.log("DB result:", result.rows);
+        return result.rows[0];
+    } catch (err) {
+        console.error("Error updating score: ", err);
+        throw err;
+    }
+
     // Validate score range
     if (score < 0 || score > 100) 
     {
@@ -236,7 +247,8 @@ app.post("/api/update-score", async (req, res) =>
         const user = await updateScore(id, newScore);
         res.json(user);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update score" });
+        console.error("Update-score error:", err);   // full log
+        res.status(500).json({ error: err.message }); // send DB error to frontend
     }
     
 });
