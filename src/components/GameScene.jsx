@@ -288,7 +288,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 
                 
                 {/*
-                {/* Debug reset button*/}
+                {/* Debug reset button
                 <div className="mt-4">
                 <button
                     onClick={async () => 
@@ -318,7 +318,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     Reset All Users (Debug)
                 </button>
                 </div>
-                {/* Debug populate button*/}
+                {/* Debug populate button
                 <div className="mt-2">
                 <button
                     onClick={async () => 
@@ -344,7 +344,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 >
                     Populate Fake Users (Debug)
                 </button>
-                {/* Debug final score button*/}
+                {/* Debug final score button
                 <div className="mt-2">
                 <button
                     onClick={() =>
@@ -360,7 +360,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                 
                 </div>
                 </div>
-                
+                */}
             </div>
         </div>
     )
