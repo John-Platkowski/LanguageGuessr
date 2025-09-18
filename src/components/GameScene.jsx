@@ -204,13 +204,7 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
 
         await updateProgressOnServer(wordNumber);
-
-        if (wordNumber >= totalWords)
-        {
-            navigateToScene("end")
-        } else {
-            navigateToScene("tree")
-        }
+        navigateToScene("tree")
     }
 
     const nextWord = () => 

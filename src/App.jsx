@@ -170,6 +170,30 @@ function App()
     {
       setShouldAdvanceWord(true)
     }
+    // if going from tree to game but it's the final word (5/5), go to end instead
+    if (currentScene === "tree" && sceneName === "game" && shouldAdvanceWord) 
+    {
+      // Check if we're completing the last word by looking at current progress
+      fetch(`https://lingo-guess.onrender.com/api/user/${userId}`)
+        .then(res => res.json())
+        .then(userData => 
+        {
+          // If progress_today will be 4 after advancement (meaning 5 words completed)
+          if (userData && userData.progress_today >= 4) 
+          {
+            setShouldAdvanceWord(false) // Reset the flag
+            setCurrentScene("end")
+            return
+          }
+          setCurrentScene(sceneName)
+        })
+        .catch(err => 
+        {
+          console.error('Error checking completion:', err)
+          setCurrentScene(sceneName) // Fallback to normal navigation
+        })
+      return
+    }
     setCurrentScene(sceneName)
   }
 
