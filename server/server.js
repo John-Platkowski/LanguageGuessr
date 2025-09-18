@@ -9,7 +9,7 @@ const app = express();
 app.options('/api/daily-words', cors())
 app.use(cors({
     origin: 'https://lingoguess.vercel.app',
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
 }));
