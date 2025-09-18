@@ -135,15 +135,16 @@ async function updateScore(id, score)
         throw new Error(`Invalid score type: ${typeof score}. Score must be a number.`);
     }
     // Coalesce returns the first non null element of the arguments
+    // Explicitly casts the type using ::numeric
     const query = `
         UPDATE users
         SET played_today = TRUE,
-            daily_score = $2,
+            daily_score = $2::numeric,
             avg_score = CASE 
-                WHEN total_games IS NULL OR total_games = 0 THEN $2
-                ELSE ((COALESCE(avg_score,0) * total_games + $2) / (total_games + 1))
+                WHEN total_games IS NULL OR total_games = 0 THEN $2::numeric
+                ELSE ((COALESCE(avg_score, 0::numeric) * total_games + $2::numeric) / (total_games + 1))
                 END,
-            total_games = COALESCE(total_games,0) + 1
+            total_games = COALESCE(total_games, 0) + 1
         WHERE id = $1
         RETURNING *;
     `;
