@@ -64,7 +64,7 @@ function App()
       let id = localStorage.getItem("userId")
       // Somewhat lazy last played date implementation; TODO: Implement last played date in DB
       const lastPlayedDate = localStorage.getItem("lastPlayedDate")
-      const today = new Date().toISOString.split('T')[0] // YYYY-MM-DD
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
 
       const isNewDay = lastPlayedDate !== today
 
