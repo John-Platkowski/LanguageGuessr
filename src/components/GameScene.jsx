@@ -3,9 +3,9 @@ import AutoCompleteInput from './AutocompleteInputField'
 
 function GameScene({ navigateToScene, score, setScore, guess, setGuess, language, setLanguage, allLanguages, allLanguageNames, userId, shouldAdvanceWord, setShouldAdvanceWord})
 {
-    const [currentWord, setCurrentWord] = useState("[NOT INITIALIZED]")
-    const [currentDefinition, setCurrentDefinition] = useState("[NOT INITIALIZED]")
-    const [currentTranslation, setCurrentTranslation] = useState("[NOT INITIALIZED]")
+    const [currentWord, setCurrentWord] = useState("...")
+    const [currentDefinition, setCurrentDefinition] = useState("...")
+    const [currentTranslation, setCurrentTranslation] = useState("...")
     const [wordNumber, setWordNumber] = useState(1)
     const [totalWords, setTotalWords] = useState(5)
     const [wordBank, setWordBank] = useState([])
@@ -286,7 +286,15 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
                     Your score today is <span className="font-semibold text-[#5e814c]">{score} pt.</span>
                 </div>
                 
-                
+                {/* Vercel wind-down disclaimer */}
+                <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 max-w-2xl mx-auto">
+                    <div className="bg-[#5e814c]/10 border border-[#5e814c]/30 rounded-lg px-4 py-2 text-center">
+                        <p className="text-[#5e814c] text-sm font-serif">
+                            <span className="font-semibold">Note:</span> Due to server wind-down policies, 
+                            initial responses after periods of inactivity may take up to 50 seconds longer.
+                        </p>
+                    </div>
+                </div>
                 {/*
                 {/* Debug reset button
                 <div className="mt-4">
