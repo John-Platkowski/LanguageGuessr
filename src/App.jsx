@@ -76,12 +76,14 @@ function App()
           const data = await res.json()
           id = data.id
           localStorage.setItem("userId", id)
+          localStorage.setItem("lastPlayedDate", today)
           console.log("New user created:", id)
         } catch (err) {
           console.error("Failed to create user:", err)
           // fallback to client-side id so UI still works
           id = crypto?.randomUUID?.() || `local-${Date.now()}`
           localStorage.setItem("userId", id)
+          localStorage.setItem("lastPlayedDate", today)
           console.log("Falling back to client-generated userId:", id)
         }
       } else if (isNewDay) {
