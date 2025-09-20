@@ -1,21 +1,67 @@
 import { useState, useEffect } from 'react'
 
-function FinalScoreScene({ score })
+function FinalScoreScene({ score, userId })
 {
 
+    const [displayScore, setDisplayScore] = useState(score)
     const [shortcutEnabled, setShortcutEnabled] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const waitTimeMS = 200;
     
     useEffect(() => 
     {
-        // Enable shortcut after delay
-        const timer = setTimeout(() => 
+        // Enable shortcut after delay and after loading is complete
+        if (!isLoading) 
         {
-            setShortcutEnabled(true)
-        }, waitTimeMS)
+            const timer = setTimeout(() => 
+            {
+                setShortcutEnabled(true)
+            }, waitTimeMS)
 
-        return () => clearTimeout(timer)
-    }, [])
+            return () => clearTimeout(timer)
+        }
+    }, [isLoading])
+
+    // Load the actual score from server if we don't have it (e.g., after refresh)
+    useEffect(() => 
+    {
+        const loadScoreFromServer = async () => 
+        {
+            // If we already have a valid score, use it
+            if (score > 0) 
+            {
+                setDisplayScore(score)
+                setIsLoading(false)
+                return
+            }
+            
+            // If no userId, we can't fetch from server
+            if (!userId || userId === 'undefined') 
+            {
+                setDisplayScore(0)
+                setIsLoading(false)
+                return
+            }
+            
+            try 
+            {
+                const response = await fetch(`https://lingo-guess.onrender.com/api/user/${userId}`)
+                const userData = await response.json()
+                
+                // Use the daily_score from the server
+                const serverScore = userData?.daily_score || 0
+                setDisplayScore(Number(serverScore))
+                console.log('Loaded score from server:', serverScore)
+            } catch (error) {
+                console.error('Failed to load score from server:', error)
+                setDisplayScore(0)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        
+        loadScoreFromServer()
+    }, [score, userId])
 
     const getFlavorText = (score) => 
     {
@@ -47,7 +93,7 @@ function FinalScoreScene({ score })
                     shortcutEnabled ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
                 >
-                    {score} / 100
+                    {displayScore} / 100
                 </div>
                 <div className={`text-xl text-[#70a861] font-serif mb-8 transition-all duration-500 ${
                     shortcutEnabled ? 'opacity-100' : 'opacity-0 pointer-events-none'
