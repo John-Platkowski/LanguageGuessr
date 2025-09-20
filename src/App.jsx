@@ -59,32 +59,54 @@ function App()
   useEffect(() => 
   {
     console.log("Attempting to init user.")
-      const initUser = async () => 
+    const initUser = async () => 
+    {
+      let id = localStorage.getItem("userId")
+      // Somewhat lazy last played date implementation; TODO: Implement last played date in DB
+      const lastPlayedDate = localStorage.getItem("lastPlayedDate")
+      const today = new Date().toISOString.split('T')[0] // YYYY-MM-DD
+
+      const isNewDay = lastPlayedDate !== today
+
+      if (!id || id === "undefined") 
       {
-        let id = localStorage.getItem("userId")
-        if (!id || id === "undefined") 
+        try 
         {
-          try 
-          {
-            const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
-            const data = await res.json()
-            id = data.id
-            localStorage.setItem("userId", id)
-            console.log("New user created:", id)
-          } catch (err) {
-            console.error("Failed to create user:", err)
-            // fallback to client-side id so UI still works
-            id = crypto?.randomUUID?.() || `local-${Date.now()}`
-            localStorage.setItem("userId", id)
-            console.log("Falling back to client-generated userId:", id)
-          }
-        } else {
-          console.log("Existing user:", id)
+          const res = await fetch("https://lingo-guess.onrender.com/api/new-user", { method: "POST" })
+          const data = await res.json()
+          id = data.id
+          localStorage.setItem("userId", id)
+          console.log("New user created:", id)
+        } catch (err) {
+          console.error("Failed to create user:", err)
+          // fallback to client-side id so UI still works
+          id = crypto?.randomUUID?.() || `local-${Date.now()}`
+          localStorage.setItem("userId", id)
+          console.log("Falling back to client-generated userId:", id)
         }
-        setUserId(id)
-        localStorage.setItem("userId", id)
+      } else if (isNewDay) {
+        // Reset user progress for new day
+        try {
+          await fetch("https://lingo-guess.onrender.com/api/reset-daily-progress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          })
+          localStorage.setItem("lastPlayedDate", today)
+          console.log("Reset progress for new day:", id)
+        } catch (err) {
+          console.error("Failed to reset daily progress:", err)
+          // Still update the date to avoid repeated attempts
+          localStorage.setItem("lastPlayedDate", today)
+        }
+      } else {
+        console.log("Existing user, same day:", id)
       }
-    initUser()
+    
+    setUserId(id)
+    localStorage.setItem("userId", id)
+  }
+  initUser()
   }, [])
 
   // Update server score when score changes (and userId is available)

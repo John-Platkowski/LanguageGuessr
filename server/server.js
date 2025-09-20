@@ -199,6 +199,27 @@ async function getUser(id)
     }
 }
 
+async function resetDailyProgress(id) 
+{
+    const query = `
+        UPDATE users
+        SET played_today = FALSE,
+            daily_score = 0,
+            progress_today = 0
+        WHERE id = $1
+        RETURNING *;
+    `;
+
+    try 
+    {
+        const result = await db.query(query, [id]);
+        return result.rows[0];
+    } catch (err) {
+        console.error("Error resetting daily progress: ", err);
+        throw err;
+    }
+}
+
 app.get("/api/user/:id", async (req, res) => 
 {
     const { id } = req.params;
@@ -266,6 +287,28 @@ app.post("/api/update-progress", async (req, res) =>
     }
 });
 
+app.post("/api/reset-daily-progress", async (req, res) => 
+{
+    const { id } = req.body;
+
+    if (!id) 
+    {
+        return res.status(400).json({ error: "Missing user id" });
+    }
+
+    try 
+    {
+        const user = await resetDailyProgress(id);
+        if (!user) 
+        {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json({ success: true, user });
+    } catch (err) {
+        console.error("Reset daily progress error:", err);
+        res.status(500).json({ error: "Failed to reset daily progress" });
+    }
+});
 
 // Danger: Debug-only route to clear all users
 app.delete("/api/debug/reset-users", async (req, res) => 
