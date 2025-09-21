@@ -180,6 +180,19 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
         }
     };
 
+
+    const normalizeGuess = (inputGuess) => 
+    {
+        if (!inputGuess || !allLanguageNames)
+        {
+            return inputGuess
+        }
+        // Find the exact case insensitive match
+        const normalizedGuess = allLanguageNames.find(lang => lang.toLowerCase() === inputGuess.toLowerCase());
+    
+        return normalizedGuess || inputGuess;
+    }
+
     // Handle word advancement when returning from tree scene
     useEffect(() => 
     {
@@ -196,15 +209,17 @@ function GameScene({ navigateToScene, score, setScore, guess, setGuess, language
     {
         if (e) 
         {
-            e.preventDefault()
+            e.preventDefault();
         }
         if (!isValidGuess)
         {
-            return
+            return;
         }
 
+        const normalizedGuess = normalizeGuess(guess);
+        setGuess(normalizeGuess);
         await updateProgressOnServer(wordNumber);
-        navigateToScene("tree")
+        navigateToScene("tree");
     }
 
     const nextWord = () => 
