@@ -1,12 +1,17 @@
-# React + Vite
+# LanguageGuessr
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[Live Demo](https://lingoguess.vercel.app)
 
-Currently, two official plugins are available:
+LanguageGuessr is a wordle-inspired web game where players are shown a unique word from a real language, its English translation, and a definition. The challenge is to correctly guess the language of origin.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- Daily unique word puzzle
+- Definitions and translations for each word
+- Clean, responsive UI
+- Built with **React**, **Vite**, **TailwindCSS**, and a custom backend
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+- **Frontend:** React, Vite, TailwindCSS
+- **Backend:** Node.js, Express
+- **Database:** PostgreSQL
+- **Deployment:** Vercel (frontend) + Render (backend)
